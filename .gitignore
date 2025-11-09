@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+venv/
+.env/
+*.sqlite3
+
+# Docker
+*.log
+*.pid
+*.seed
+*.bak
+*.swp
+.DS_Store
+docker-compose.override.yml
+
+# VSCode / PyCharm
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
