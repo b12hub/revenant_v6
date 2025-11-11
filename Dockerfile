@@ -15,3 +15,4 @@ EXPOSE 8000
 
 # Start FastAPI
 CMD ["uvicorn", "core.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["alembic", "-c", "alembic.ini", "upgrade", "head"]
