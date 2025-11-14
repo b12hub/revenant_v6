@@ -1,0 +1,1224 @@
+{
+  "name": "revenant_B_series_workflow.json",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "07f98bbf-5823-43c0-afd3-7f007ba08ccf",
+      "name": "Trigger - B-Series Input",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2688,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "REVENANT_JWT_TOKEN",
+              "value": "simulated_jwt_token_v4.4.1",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "REVENANT_B_URL",
+              "value": "https://api.revenant.metacore/b-series",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "REVENANT_KNOWLEDGE_URL",
+              "value": "https://api.revenant.metacore/knowledge",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "B_QUEUE_LATENCY",
+              "value": 100,
+              "type": "number"
+            },
+            {
+              "id": "id-5",
+              "name": "B_EXECUTION_MODE",
+              "value": "simulation",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "REVENANT_ALERT_CHANNEL",
+              "value": "revenant_alerts",
+              "type": "string"
+            },
+            {
+              "id": "id-7",
+              "name": "REVENANT_A_OUTPUT",
+              "value": "Simulated A-Series output data",
+              "type": "string"
+            },
+            {
+              "id": "id-8",
+              "name": "emotional_state",
+              "value": "neutral",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "1f24d0a4-5b9b-4d4d-9fed-5b79b1ebf895",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2464,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 0.1
+      },
+      "id": "08ba54a3-b921-4a05-b9cd-45c79166ae60",
+      "name": "Wait - Async Queue 1",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -2240,
+        192
+      ],
+      "webhookId": "083a44f9-436e-4cc8-8adc-c802813522cd"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all()[0].json; const contextMemory = { stored_context: 'Previous interaction context', user_preferences: 'User preference data', session_history: ['action1', 'action2'] }; const mergedContext = { ...input, ...contextMemory, module: 'B1_ContextualMemory', status: 'success', timestamp: new Date().toISOString() }; return { json: mergedContext };"
+      },
+      "id": "a0e0597e-b365-4c6c-b09c-b5189fbf5dde",
+      "name": "B1_ContextualMemory",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2016,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 0.1
+      },
+      "id": "342a1f3b-f8be-453c-820d-c3d8da3cb1a7",
+      "name": "Wait - Async Queue 2",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1792,
+        192
+      ],
+      "webhookId": "782fe45c-00f6-47a1-acde-291a152ced41"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all()[0].json; const actionPlan = { intent: 'execute_task', priority: 'high', timing: 'immediate', actions: ['analyze_context', 'select_tool', 'execute_command'], estimated_duration_ms: 500 }; return { json: { ...input, actionPlan, module: 'B2_AutonomousPlanner', status: 'success', timestamp: new Date().toISOString() } };"
+      },
+      "id": "48765363-4f81-4b65-bc05-a5a11aff99ef",
+      "name": "B2_AutonomousPlanner",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1568,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 0.1
+      },
+      "id": "5a240ab3-b703-40e0-b146-dd4b5b5bc143",
+      "name": "Wait - Async Queue 3",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1344,
+        192
+      ],
+      "webhookId": "746168a5-e87c-4467-9901-ec41d815e337"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all()[0].json; const executionResult = { tool_executed: 'mock_api_call', result: 'success', metrics: { latency_ms: 45, cpu_usage: '12%', memory_usage: '256MB' }, response_data: { status: 200, message: 'Tool execution completed' } }; return { json: { ...input, executionResult, module: 'B3_ToolManager', status: 'success', timestamp: new Date().toISOString() } };"
+      },
+      "id": "dc031d6d-942e-4ded-9fd0-76774db9724f",
+      "name": "B3_ToolManager",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1120,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 0.1
+      },
+      "id": "c68c72c2-1f95-4624-890c-fb3c6cee4d22",
+      "name": "Wait - Async Queue 4",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -896,
+        192
+      ],
+      "webhookId": "dac17fa1-7d86-46b4-a1fd-75f5c7b0c515"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all()[0].json; const improvementMetrics = { success_rate: 0.95, learning_points: ['optimized_tool_selection', 'reduced_latency'], adjustments_made: ['cache_strategy', 'priority_queue'] }; $vars.B_METRICS = improvementMetrics; return { json: { ...input, improvementMetrics, module: 'B4_SelfImprovement', status: 'success', timestamp: new Date().toISOString() } };"
+      },
+      "id": "968b437a-a263-43d5-8b28-db1fd61770a7",
+      "name": "B4_SelfImprovement",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -672,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 0.1
+      },
+      "id": "b056d4e3-3924-4dac-a6df-4b9b089e5fd3",
+      "name": "Wait - Async Queue 5",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -448,
+        192
+      ],
+      "webhookId": "ab8e48fb-f2a0-4a2e-9c51-cbc0bde14133"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.emotional_state }}",
+                    "rightValue": "positive",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "positive"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.emotional_state }}",
+                    "rightValue": "neutral",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "neutral"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.emotional_state }}",
+                    "rightValue": "negative",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "negative"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "1"
+        }
+      },
+      "id": "178793ee-ee8f-4e04-a9af-fde63e48a2ec",
+      "name": "B5_EmotionalLayer",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -224,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "emotional_tone",
+              "value": "enthusiastic",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "emotional_weight",
+              "value": 1.2,
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "561a6520-a8f2-4abf-af1b-deae738a42ea",
+      "name": "Emotional - Positive",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "emotional_tone",
+              "value": "balanced",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "emotional_weight",
+              "value": 1,
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "2e3ffd3c-54dd-46ac-ab4d-fc5bb918db41",
+      "name": "Emotional - Neutral",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "emotional_tone",
+              "value": "cautious",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "emotional_weight",
+              "value": 0.8,
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "3561703b-f98d-4f53-90c8-81312ed136d8",
+      "name": "Emotional - Negative",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "module",
+              "value": "B5_EmotionalLayer",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "status",
+              "value": "success",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "timestamp",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "fe935ea5-5f57-4186-8c43-7b779b5c4f1d",
+      "name": "Merge Emotional Paths",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 0.1
+      },
+      "id": "e3424fb5-0659-4914-b3f3-7c8ddf5d9d93",
+      "name": "Wait - Async Queue 6",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        192
+      ],
+      "webhookId": "d6b843c7-d3ba-4893-ad11-4891301d96dc"
+    },
+    {
+      "parameters": {
+        "amount": 0.1
+      },
+      "id": "11278af8-b00b-49e0-9ab0-f0c2e6b5238e",
+      "name": "Wait - Async Queue 7",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        192
+      ],
+      "webhookId": "9667465b-d66e-48f3-a15c-6a4529de8d13"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all()[0].json; const resourcePoints = 10; const usageData = { resources_deducted: resourcePoints, remaining_balance: 990, transaction_id: 'txn_' + Date.now(), billing_tier: 'premium' }; $vars.B_USAGE = usageData; return { json: { ...input, usageData, module: 'B7_MonetizationEngine', status: 'success', timestamp: new Date().toISOString() } };"
+      },
+      "id": "b7a938d2-3181-478d-ac96-46ebfeebf580",
+      "name": "B7_MonetizationEngine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 0.1
+      },
+      "id": "36f15086-5709-4ca6-8f3f-d12a163c622e",
+      "name": "Wait - Async Queue 8",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1344,
+        192
+      ],
+      "webhookId": "4baa31a8-0225-421b-a386-a11c88536cbc"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all()[0].json; const B_FINAL_OUTPUT = { series: 'B', version: 'v4.4.1', status: 'complete', output_format: 'json', ui_adaptation: { theme: 'dark', layout: 'compact', accessibility: 'high' }, ready_for_c_series: true }; $vars.REVENANT_C_INPUT = B_FINAL_OUTPUT; return { json: { ...input, B_FINAL_OUTPUT, module: 'B8_AdaptiveUI', status: 'success', timestamp: new Date().toISOString() } };"
+      },
+      "id": "3d725942-d1c5-4cc1-ab22-386d6019f3f8",
+      "name": "B8_AdaptiveUI",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all()[0].json; const startTime = new Date(input.timestamp || Date.now()); const endTime = new Date(); const executionTime = endTime - startTime; const logData = { workflow: 'Revenant B-Series v4.4.1', execution_time_ms: executionTime, modules_executed: ['B1_ContextualMemory', 'B2_AutonomousPlanner', 'B3_ToolManager', 'B4_SelfImprovement', 'B5_EmotionalLayer', 'B6_KnowledgeLayer', 'B7_MonetizationEngine', 'B8_AdaptiveUI'], all_status: 'success', logged_at: new Date().toISOString() }; console.log('B-Series Execution Log:', JSON.stringify(logData, null, 2)); return { json: { ...input, logData } };"
+      },
+      "id": "f6f30dae-9e4f-4f43-aad2-91a30b4d32ec",
+      "name": "B_Series_Logger",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all()[0].json; const requiredModules = ['B1_ContextualMemory', 'B2_AutonomousPlanner', 'B3_ToolManager', 'B4_SelfImprovement', 'B5_EmotionalLayer', 'B6_KnowledgeLayer', 'B7_MonetizationEngine', 'B8_AdaptiveUI']; let allSuccess = true; let failedModules = []; for (const module of requiredModules) { if (input.module !== module && !input[module]) { const moduleStatus = input.status || 'unknown'; if (moduleStatus !== 'success') { allSuccess = false; failedModules.push(module); } } } const validationResult = { B_SERIES_READY: allSuccess, validation_passed: allSuccess, failed_modules: failedModules, validated_at: new Date().toISOString() }; return { json: { ...input, validationResult } };"
+      },
+      "id": "35ed9d8e-f61e-417f-9d23-8c073310ae9e",
+      "name": "B_Series_Validation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2016,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $('B_Series_Validation').item.json.validationResult.B_SERIES_READY }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9418188e-1d2a-4fc4-859b-29c160d0426f",
+      "name": "Validation Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2240,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "series",
+              "value": "B",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "status",
+              "value": "complete",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "latency_ms",
+              "value": "={{ $json.logData.execution_time_ms }}",
+              "type": "number"
+            },
+            {
+              "id": "id-4",
+              "name": "metrics",
+              "value": "={{ $json.improvementMetrics }}",
+              "type": "object"
+            },
+            {
+              "id": "id-5",
+              "name": "final_message",
+              "value": "B-Series execution completed successfully. Ready for C-Series.",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "09f23109-9a12-4e90-a311-3cc915c83150",
+      "name": "Success Output",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2464,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all()[0].json; const alertChannel = $('Workflow Configuration').first().json.REVENANT_ALERT_CHANNEL; const alertData = { alert_type: 'B_SERIES_VALIDATION_FAILURE', failed_modules: input.validationResult.failed_modules, timestamp: new Date().toISOString(), severity: 'high', channel: alertChannel, message: 'B-Series validation failed. Manual intervention required.' }; console.error('ALERT:', JSON.stringify(alertData, null, 2)); return { json: { ...input, alertData } };"
+      },
+      "id": "f4fd0b81-909a-453c-81c5-f00d4985eae2",
+      "name": "Failure Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2464,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all()[0].json; const knowledgeData = { knowledge_base: 'revenant_kb_v4', query_result: { documents: ['doc1', 'doc2', 'doc3'], relevance_score: 0.92, retrieved_facts: ['fact_a', 'fact_b'] }, cache_hit: true }; return { json: { ...input, knowledgeData, module: 'B6_KnowledgeLayer', status: 'success', timestamp: new Date().toISOString() } };"
+      },
+      "id": "3a63a7fe-4782-4fbe-a37c-ec69f9e55191",
+      "name": "B6_KnowledgeLayer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const traceId = `BTRACE-${$now.toISOString()}-${$runIndex}`;\n$vars.REVENANT_TRACE_ID = traceId;\n$vars.REVENANT_OBSERVABILITY_LOGS = [];\n$vars.REVENANT_QUEUE_DEPTH = $vars.REVENANT_QUEUE_DEPTH || 10000;\nconsole.log(`🚀 Starting B-Series Trace: ${traceId}`);\nreturn { json: { ...$input.all()[0].json, traceId, telemetry_start: $now.toISOString() } };"
+      },
+      "id": "119ddd05-e2e2-4207-92b7-26a5aa826a2a",
+      "name": "Start Trace",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1024,
+        1104
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const nodeName = 'B1_ContextualMemory';\nconst startTime = new Date();\n$vars[`${nodeName}_start`] = startTime;\nconsole.log(`🟡 Starting ${nodeName} (trace: ${$vars.REVENANT_TRACE_ID})`);\nreturn $input.all();"
+      },
+      "id": "40ebd2eb-d079-4adf-bde9-05531a53796d",
+      "name": "Pre-B1 Logger",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -576,
+        1104
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const nodeName = 'B1_ContextualMemory';\nconst endTime = new Date();\nconst startTime = $vars[`${nodeName}_start`];\nconst durationMs = endTime - startTime;\nconst logEntry = {\n  node_name: nodeName,\n  start_time: startTime.toISOString(),\n  end_time: endTime.toISOString(),\n  duration_ms: durationMs,\n  trace_id: $vars.REVENANT_TRACE_ID,\n  status: 'completed'\n};\n$vars.REVENANT_OBSERVABILITY_LOGS.push(logEntry);\nconsole.log(`🧩 [${nodeName}] executed in ${durationMs}ms (trace: ${$vars.REVENANT_TRACE_ID})`);\nreturn $input.all();"
+      },
+      "id": "da035fc4-29b7-42d8-b0f3-4ff6c1f5d25e",
+      "name": "Post-B1 Logger",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        96,
+        1104
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const logs = $vars.REVENANT_OBSERVABILITY_LOGS || [];\nlet totalRuntime = 0;\nlet maxLatency = 0;\nlet minLatency = Infinity;\nlet slowestNode = '';\nlet fastestNode = '';\n\nlogs.forEach(log => {\n  totalRuntime += log.duration_ms;\n  if (log.duration_ms > maxLatency) {\n    maxLatency = log.duration_ms;\n    slowestNode = log.node_name;\n  }\n  if (log.duration_ms < minLatency) {\n    minLatency = log.duration_ms;\n    fastestNode = log.node_name;\n  }\n});\n\nconst averageLatency = logs.length > 0 ? totalRuntime / logs.length : 0;\nconst queueDepth = $vars.REVENANT_QUEUE_DEPTH || 10000;\n\nconst telemetrySummary = {\n  series: 'B',\n  trace_id: $vars.REVENANT_TRACE_ID,\n  total_runtime_ms: totalRuntime,\n  average_latency_ms: averageLatency,\n  max_latency_ms: maxLatency,\n  min_latency_ms: minLatency,\n  slowest_module: slowestNode,\n  fastest_module: fastestNode,\n  total_nodes_executed: logs.length,\n  queue_depth_used: queueDepth,\n  timestamp: new Date().toISOString()\n};\n\n$vars.TELEMETRY_SUMMARY = telemetrySummary;\nreturn { json: { ...$input.all()[0].json, telemetrySummary } };"
+      },
+      "id": "b5fdd215-0a34-4289-9c15-ce54eda22eb9",
+      "name": "Telemetry Collector",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1024,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.REVENANT_TELEMETRY_URL || 'https://staging.revenant-system.com/api/telemetry' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $vars.REVENANT_JWT_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "id": "5973cb42-141f-4f09-8d41-e1d943b6d97e",
+      "name": "Trace Exporter",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -800,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const logs = $vars.REVENANT_OBSERVABILITY_LOGS || [];\nconst slowNodes = logs.filter(log => log.duration_ms > 500).map(log => ({\n  node: log.node_name,\n  duration_ms: log.duration_ms\n}));\n\nconst healthy = slowNodes.length === 0;\n\nslowNodes.forEach(slowNode => {\n  console.log(`⚠️ Slow module detected: ${slowNode.node} (${slowNode.duration_ms}ms)`);\n});\n\nconst healthStatus = {\n  healthy: healthy,\n  slow_nodes: slowNodes,\n  total_slow_nodes: slowNodes.length,\n  health_score: healthy ? 100 : Math.max(0, 100 - (slowNodes.length * 10)),\n  timestamp: new Date().toISOString()\n};\n\n$vars.HEALTH_STATUS = healthStatus;\nreturn { json: { ...$input.all()[0].json, healthStatus } };"
+      },
+      "id": "190566fc-84f7-49a4-95dd-108d4a005540",
+      "name": "Health Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -576,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const telemetry = $vars.TELEMETRY_SUMMARY;\nconst health = $vars.HEALTH_STATUS;\n\nconsole.log('\\n✅ B-Series Observability Summary');\nconsole.log(`Trace: ${telemetry.trace_id}`);\nconsole.log(`Total runtime: ${telemetry.total_runtime_ms}ms`);\nconsole.log(`Avg latency: ${telemetry.average_latency_ms}ms`);\nconsole.log(`Slow nodes: ${health.total_slow_nodes}`);\nconsole.log(`Status: ${health.healthy ? 'Healthy' : 'Degraded'}`);\nconsole.log(`Health Score: ${health.health_score}/100`);\n\nconst finalOutput = {\n  series: 'B',\n  trace_id: $vars.REVENANT_TRACE_ID,\n  observability_status: '✅ Active',\n  telemetry_summary: telemetry,\n  health_status: health\n};\n\nreturn { json: { ...$input.all()[0].json, finalOutput } };"
+      },
+      "id": "20aed7fa-7d55-4390-ab5c-56f8ea47a3fa",
+      "name": "Summary Console Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -352,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "REVENANT_JWT_TOKEN",
+              "value": "simulated_jwt_token_v4.4.1",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "REVENANT_B_URL",
+              "value": "https://api.revenant.metacore/b-series",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "REVENANT_KNOWLEDGE_URL",
+              "value": "https://api.revenant.metacore/knowledge",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "B_QUEUE_LATENCY",
+              "value": 100,
+              "type": "number"
+            },
+            {
+              "id": "id-5",
+              "name": "B_EXECUTION_MODE",
+              "value": "simulation",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "REVENANT_ALERT_CHANNEL",
+              "value": "revenant_alerts",
+              "type": "string"
+            },
+            {
+              "id": "id-7",
+              "name": "REVENANT_A_OUTPUT",
+              "value": "Simulated A-Series output data",
+              "type": "string"
+            },
+            {
+              "id": "id-8",
+              "name": "emotional_state",
+              "value": "neutral",
+              "type": "string"
+            },
+            {
+              "id": "id-9",
+              "name": "REVENANT_TELEMETRY_URL",
+              "value": "https://staging.revenant-system.com/api/telemetry",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "dc97d7b6-bd21-4220-8c4f-ecf9ca763c1d",
+      "name": "Workflow Configuration1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -800,
+        1104
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 0.1
+      },
+      "id": "83474d27-2763-48a1-8366-798e0018ae98",
+      "name": "Wait - Async Queue ",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -352,
+        1104
+      ],
+      "webhookId": "083a44f9-436e-4cc8-8adc-c802813522cd"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all()[0].json; const contextMemory = { stored_context: 'Previous interaction context', user_preferences: 'User preference data', session_history: ['action1', 'action2'] }; const mergedContext = { ...input, ...contextMemory, module: 'B1_ContextualMemory', status: 'success', timestamp: new Date().toISOString() }; return { json: mergedContext };"
+      },
+      "id": "973391fe-8fde-41f0-be85-64c3b0de11c9",
+      "name": "B1_ContextualMemory1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -128,
+        1104
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Trigger - B-Series Input": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Wait - Async Queue 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait - Async Queue 1": {
+      "main": [
+        [
+          {
+            "node": "B1_ContextualMemory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B1_ContextualMemory": {
+      "main": [
+        [
+          {
+            "node": "Wait - Async Queue 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait - Async Queue 2": {
+      "main": [
+        [
+          {
+            "node": "B2_AutonomousPlanner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B2_AutonomousPlanner": {
+      "main": [
+        [
+          {
+            "node": "Wait - Async Queue 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait - Async Queue 3": {
+      "main": [
+        [
+          {
+            "node": "B3_ToolManager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B3_ToolManager": {
+      "main": [
+        [
+          {
+            "node": "Wait - Async Queue 4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait - Async Queue 4": {
+      "main": [
+        [
+          {
+            "node": "B4_SelfImprovement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B4_SelfImprovement": {
+      "main": [
+        [
+          {
+            "node": "Wait - Async Queue 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait - Async Queue 5": {
+      "main": [
+        [
+          {
+            "node": "B5_EmotionalLayer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B5_EmotionalLayer": {
+      "main": [
+        [
+          {
+            "node": "Emotional - Positive",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Emotional - Neutral",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Emotional - Negative",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Emotional - Positive": {
+      "main": [
+        [
+          {
+            "node": "Merge Emotional Paths",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Emotional - Neutral": {
+      "main": [
+        [
+          {
+            "node": "Merge Emotional Paths",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Emotional - Negative": {
+      "main": [
+        [
+          {
+            "node": "Merge Emotional Paths",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Emotional Paths": {
+      "main": [
+        [
+          {
+            "node": "Wait - Async Queue 6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait - Async Queue 7": {
+      "main": [
+        [
+          {
+            "node": "B7_MonetizationEngine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B7_MonetizationEngine": {
+      "main": [
+        [
+          {
+            "node": "Wait - Async Queue 8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait - Async Queue 8": {
+      "main": [
+        [
+          {
+            "node": "B8_AdaptiveUI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B8_AdaptiveUI": {
+      "main": [
+        [
+          {
+            "node": "B_Series_Logger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B_Series_Logger": {
+      "main": [
+        [
+          {
+            "node": "B_Series_Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B_Series_Validation": {
+      "main": [
+        [
+          {
+            "node": "Validation Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validation Check": {
+      "main": [
+        [
+          {
+            "node": "Success Output",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Failure Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait - Async Queue 6": {
+      "main": [
+        [
+          {
+            "node": "B6_KnowledgeLayer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B6_KnowledgeLayer": {
+      "main": [
+        [
+          {
+            "node": "Wait - Async Queue 7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Trace": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pre-B1 Logger": {
+      "main": [
+        [
+          {
+            "node": "Wait - Async Queue ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telemetry Collector": {
+      "main": [
+        [
+          {
+            "node": "Trace Exporter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trace Exporter": {
+      "main": [
+        [
+          {
+            "node": "Health Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Health Check": {
+      "main": [
+        [
+          {
+            "node": "Summary Console Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration1": {
+      "main": [
+        [
+          {
+            "node": "Pre-B1 Logger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait - Async Queue ": {
+      "main": [
+        [
+          {
+            "node": "B1_ContextualMemory1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B1_ContextualMemory1": {
+      "main": [
+        [
+          {
+            "node": "Post-B1 Logger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "23f86a73-275a-4e9c-b590-167592f1d33b",
+  "meta": {
+    "instanceId": "45c426cf575386e961ded65eb8df1ef7e1682833df3197c603f479c39ae35b01"
+  },
+  "id": "lpnSGaWHEjR8yO6l",
+  "tags": []
+}

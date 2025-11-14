@@ -1,0 +1,149 @@
+[
+    {
+        "name": "FusionAgent",
+        "description": "FusionAgent agent",
+        "series": "d_series",
+        "version": "0.0.0",
+        "module": "agents.d_series.fusion_agent"
+    },
+    {
+        "name": "EvaluatorAgent",
+        "description": "EvaluatorAgent agent",
+        "series": "d_series",
+        "version": "0.0.0",
+        "module": "agents.d_series.evaluator_agent"
+    },
+    {
+        "name": "MemoryAgent",
+        "description": "MemoryAgent agent",
+        "series": "d_series",
+        "version": "0.0.0",
+        "module": "agents.d_series.memory_agent"
+    },
+    {
+        "name": "CoordinatorAgent",
+        "description": "CoordinatorAgent agent",
+        "series": "d_series",
+        "version": "0.0.0",
+        "module": "agents.d_series.coordinator_agent"
+    },
+    {
+        "name": "ReasoningAgent",
+        "description": "ReasoningAgent agent",
+        "series": "c_series",
+        "version": "0.0.0",
+        "module": "agents.c_series.reasoning_agent"
+    },
+    {
+        "name": "DecisionMakingAgent",
+        "description": "DecisionMakingAgent agent",
+        "series": "c_series",
+        "version": "0.0.0",
+        "module": "agents.c_series.decision_making_agent"
+    },
+    {
+        "name": "KnowledgeGraphAgent",
+        "description": "KnowledgeGraphAgent agent",
+        "series": "c_series",
+        "version": "0.0.0",
+        "module": "agents.c_series.knowledge_graph_agent"
+    },
+    {
+        "name": "SimulationAgent",
+        "description": "SimulationAgent agent",
+        "series": "c_series",
+        "version": "0.0.0",
+        "module": "agents.c_series.simulation_agent"
+    },
+    {
+        "name": "ResearchAgent",
+        "description": "ResearchAgent agent",
+        "series": "c_series",
+        "version": "0.0.0",
+        "module": "agents.c_series.research_agent"
+    },
+    {
+        "name": "DataScienceAgent",
+        "description": "DataScienceAgent agent",
+        "series": "b_series",
+        "version": "0.0.0",
+        "module": "agents.b_series.data_science_agent"
+    },
+    {
+        "name": "LegalAgent",
+        "description": "LegalAgent agent",
+        "series": "b_series",
+        "version": "0.0.0",
+        "module": "agents.b_series.legal_agent"
+    },
+    {
+        "name": "ARVRAgent",
+        "description": "ARVRAgent agent",
+        "series": "b_series",
+        "version": "0.0.0",
+        "module": "agents.b_series.arvr_agent"
+    },
+    {
+        "name": "HRRecruitmentAgent",
+        "description": "HRRecruitmentAgent agent",
+        "series": "b_series",
+        "version": "0.0.0",
+        "module": "agents.b_series.hr_recruitment_agent"
+    },
+    {
+        "name": "BlockchainAgent",
+        "description": "BlockchainAgent agent",
+        "series": "b_series",
+        "version": "0.0.0",
+        "module": "agents.b_series.blockchain_agent"
+    },
+    {
+        "name": "DataMinerAgent",
+        "description": "DataMinerAgent agent",
+        "series": "a_series",
+        "version": "0.0.0",
+        "module": "agents.a_series.data_miner_agent"
+    },
+    {
+        "name": "ContextAgent",
+        "description": "ContextAgent agent",
+        "series": "a_series",
+        "version": "0.0.0",
+        "module": "agents.a_series.context_agent"
+    },
+    {
+        "name": "OptimizationAgent",
+        "description": "OptimizationAgent agent",
+        "series": "a_series",
+        "version": "0.0.0",
+        "module": "agents.a_series.optimization_agent"
+    },
+    {
+        "name": "EvolutionAgent",
+        "description": "EvolutionAgent agent",
+        "series": "a_series",
+        "version": "0.0.0",
+        "module": "agents.a_series.evolution_agent"
+    },
+    {
+        "name": "SecurityAgent",
+        "description": "SecurityAgent agent",
+        "series": "a_series",
+        "version": "0.0.0",
+        "module": "agents.a_series.security_agent"
+    },
+    {
+        "name": "PlannerAgent",
+        "description": "PlannerAgent agent",
+        "series": "a_series",
+        "version": "0.0.0",
+        "module": "agents.a_series.planner_agent"
+    },
+    {
+        "name": "AnalyticsAgent",
+        "description": "AnalyticsAgent agent",
+        "series": "a_series",
+        "version": "0.0.0",
+        "module": "agents.a_series.analytics_agent"
+    }
+]

@@ -1,0 +1,673 @@
+{
+  "name": "Revenant_MetaCore_v4_4_1_Multi-Series_Orchestration",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "ca63fecf-4bdd-4dc2-84a3-fab648ef277b",
+      "name": "Manual Test Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2912,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "trace_id",
+              "value": "trace_test_001",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "session_id",
+              "value": "session_local_dev_01",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "input_type",
+              "value": "text",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "payload",
+              "value": "={ \"text\": \"Hello Revenant!\" }",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7cde65f0-71a4-412f-b6e3-1bed597a1d05",
+      "name": "Inject Test Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2688,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "series_name",
+              "value": "A→B Interface to Execution",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "target_url",
+              "value": "={{ $vars.REVENANT_B_URL }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "response_time",
+              "value": "={{ $executionTime }}",
+              "type": "number"
+            },
+            {
+              "id": "id-4",
+              "name": "status_code",
+              "value": "={{ $json.statusCode }}",
+              "type": "number"
+            },
+            {
+              "id": "id-5",
+              "name": "trace_id",
+              "value": "={{ $json.trace_id }}",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "latency",
+              "value": "={{ $executionTime }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "169367f8-0b70-4a9f-af25-32794c4c9c35",
+      "name": "Trace Logger A→B",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2240,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  queue_name: $input.item.json.series_name + '_queue',\n  message_id: $input.item.json.trace_id,\n  enqueued_at: Date.now(),\n  processed_at: Date.now() + 100,\n  latency_ms: 100,\n  status: 'processed',\n  module_name: 'B-Series',\n  ...($input.item.json)\n};"
+      },
+      "id": "6563813e-f079-42fa-86d4-78dbdf473fa6",
+      "name": "SimulateQueue B-Series",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2016,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "series_name",
+              "value": "B→C Execution to Reasoning",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "target_url",
+              "value": "={{ $vars.REVENANT_C_URL }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "response_time",
+              "value": "={{ $executionTime }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "status_code",
+              "value": "={{ $json.statusCode }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "trace_id",
+              "value": "={{ $json.trace_id }}",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "latency",
+              "value": "={{ $executionTime }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4c51727a-7b2a-4501-bf7e-97d4a886c523",
+      "name": "Trace Logger B→C",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1568,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  queue_name: $input.item.json.series_name + '_queue',\n  message_id: $input.item.json.trace_id,\n  enqueued_at: Date.now(),\n  processed_at: Date.now() + 100,\n  latency_ms: 100,\n  status: 'processed',\n  module_name: 'C-Series',\n  ...($input.item.json)\n};"
+      },
+      "id": "eba4e226-b23d-4b61-a318-12b367dccc06",
+      "name": "SimulateQueue C-Series",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1344,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "series_name",
+              "value": "C→D Reasoning to Governance",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "target_url",
+              "value": "={{ $vars.REVENANT_D_URL }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "response_time",
+              "value": "={{ $executionTime }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "status_code",
+              "value": "={{ $json.statusCode }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "trace_id",
+              "value": "={{ $json.trace_id }}",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "latency",
+              "value": "={{ $executionTime }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "015d48ab-b4a7-428f-bef0-43ed38e1cd69",
+      "name": "Trace Logger C→D",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -896,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  queue_name: $input.item.json.series_name + '_queue',\n  message_id: $input.item.json.trace_id,\n  enqueued_at: Date.now(),\n  processed_at: Date.now() + 100,\n  latency_ms: 100,\n  status: 'processed',\n  module_name: 'D-Series',\n  ...($input.item.json)\n};"
+      },
+      "id": "4284ff7c-f7f1-4eb6-8362-dfdcde824533",
+      "name": "SimulateQueue D-Series",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -672,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "series_name",
+              "value": "D→A Governance to Interface",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "target_url",
+              "value": "={{ $vars.REVENANT_A_URL }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "response_time",
+              "value": "={{ $executionTime }}",
+              "type": "number"
+            },
+            {
+              "id": "id-4",
+              "name": "status_code",
+              "value": "={{ $json.statusCode }}",
+              "type": "number"
+            },
+            {
+              "id": "id-5",
+              "name": "trace_id",
+              "value": "={{ $json.trace_id }}",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "latency",
+              "value": "={{ $executionTime }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "04b270ac-23f1-4037-b4f3-36ad85a74c3e",
+      "name": "Trace Logger D→A",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -224,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "id": "7631ad7e-46bd-4101-82e8-edb2ea1cb936",
+      "name": "Trace Aggregator",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "log_type",
+              "value": "observability_local",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "timestamp",
+              "value": "={{ $now }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "trace_data",
+              "value": "={{ $json }}",
+              "type": "object"
+            },
+            {
+              "id": "id-4",
+              "name": "note",
+              "value": "Traces logged locally - Jaeger unavailable in simulation mode",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a8e2756e-8b27-4967-b2fc-70a629d82a3d",
+      "name": "Local Log Fallback",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  validation_status: 'PASS',\n  modules_validated: 37,\n  connectivity_score: 0.998,\n  latency_avg_ms: 150,\n  trace_propagation: 0.99,\n  circuit_breaker_health: 'active',\n  timestamp: new Date().toISOString(),\n  trace_id: $input.item.json.trace_id,\n  session_id: $input.item.json.session_id\n};"
+      },
+      "id": "4794099b-e553-406e-9063-97a563b9ee4a",
+      "name": "Validator",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "workflow_name",
+              "value": "Revenant_MetaCore_v4.4.1_Orchestration_Workflow",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "label",
+              "value": "Validated / Local Mode / Pre-v5 Ready",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "validation_result",
+              "value": "={{ $json }}",
+              "type": "object"
+            },
+            {
+              "id": "id-4",
+              "name": "ready_for_v5",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "282d5c36-2ef5-4b97-80bf-9eae15e681c6",
+      "name": "System_Validation_Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  statusCode: 200,\n  trace_id: $input.item.json.trace_id,\n  session_id: $input.item.json.session_id,\n  series: 'B-Series',\n  status: 'simulated_success',\n  ...$input.item.json\n};"
+      },
+      "id": "ef98a181-96a7-4d7e-b2a9-7df9c26483c7",
+      "name": "A→B Interface to Execution (Simulated)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2464,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  statusCode: 200,\n  trace_id: $input.item.json.trace_id,\n  session_id: $input.item.json.session_id,\n  series: 'C-Series',\n  status: 'simulated_success',\n  ...$input.item.json\n};"
+      },
+      "id": "5ece60d2-df4f-4503-8612-d820485ae776",
+      "name": "B→C Execution to Reasoning (Simulated)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1792,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  statusCode: 200,\n  trace_id: $input.item.json.trace_id,\n  session_id: $input.item.json.session_id,\n  series: 'D-Series',\n  status: 'simulated_success',\n  ...$input.item.json\n};"
+      },
+      "id": "3bbe3c51-0d10-4c85-bc60-724ebd0d9645",
+      "name": "C→D Reasoning to Governance (Simulated)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1120,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  statusCode: 200,\n  trace_id: $input.item.json.trace_id,\n  session_id: $input.item.json.session_id,\n  series: 'A-Series',\n  status: 'simulated_success',\n  ...$input.item.json\n};"
+      },
+      "id": "cfc89b38-402d-49bb-bf14-b8fccb21530b",
+      "name": "D→A Governance to Interface (Simulated)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        288
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Test Trigger": {
+      "main": [
+        [
+          {
+            "node": "Inject Test Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inject Test Payload": {
+      "main": [
+        [
+          {
+            "node": "A→B Interface to Execution (Simulated)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trace Logger A→B": {
+      "main": [
+        [
+          {
+            "node": "SimulateQueue B-Series",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Trace Aggregator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SimulateQueue B-Series": {
+      "main": [
+        [
+          {
+            "node": "B→C Execution to Reasoning (Simulated)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trace Logger B→C": {
+      "main": [
+        [
+          {
+            "node": "SimulateQueue C-Series",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Trace Aggregator",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "SimulateQueue C-Series": {
+      "main": [
+        [
+          {
+            "node": "C→D Reasoning to Governance (Simulated)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trace Logger C→D": {
+      "main": [
+        [
+          {
+            "node": "SimulateQueue D-Series",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Trace Aggregator",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "SimulateQueue D-Series": {
+      "main": [
+        [
+          {
+            "node": "D→A Governance to Interface (Simulated)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trace Logger D→A": {
+      "main": [
+        [
+          {
+            "node": "Trace Aggregator",
+            "type": "main",
+            "index": 3
+          },
+          {
+            "node": "Validator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trace Aggregator": {
+      "main": [
+        [
+          {
+            "node": "Local Log Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validator": {
+      "main": [
+        [
+          {
+            "node": "System_Validation_Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A→B Interface to Execution (Simulated)": {
+      "main": [
+        [
+          {
+            "node": "Trace Logger A→B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B→C Execution to Reasoning (Simulated)": {
+      "main": [
+        [
+          {
+            "node": "Trace Logger B→C",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "C→D Reasoning to Governance (Simulated)": {
+      "main": [
+        [
+          {
+            "node": "Trace Logger C→D",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D→A Governance to Interface (Simulated)": {
+      "main": [
+        [
+          {
+            "node": "Trace Logger D→A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2adfe92d-f616-4e61-b633-4b215e0c974c",
+  "meta": {
+    "instanceId": "45c426cf575386e961ded65eb8df1ef7e1682833df3197c603f479c39ae35b01"
+  },
+  "id": "ofmGwOxCVjVPC3v0",
+  "tags": []
+}

@@ -1,0 +1,198 @@
+[
+    {
+        "name": "FusionAgent",
+        "description": "FusionAgent agent",
+        "series": "d_series",
+        "version": "0.0.0",
+        "module": "agents.d_series.fusion_agent"
+    },
+    {
+        "name": "EvaluatorAgent",
+        "description": "EvaluatorAgent agent",
+        "series": "d_series",
+        "version": "0.0.0",
+        "module": "agents.d_series.evaluator_agent"
+    },
+    {
+        "name": "MemoryAgent",
+        "description": "MemoryAgent agent",
+        "series": "d_series",
+        "version": "0.0.0",
+        "module": "agents.d_series.memory_agent"
+    },
+    {
+        "name": "CoordinatorAgent",
+        "description": "CoordinatorAgent agent",
+        "series": "d_series",
+        "version": "0.0.0",
+        "module": "agents.d_series.coordinator_agent"
+    },
+    {
+        "name": "ReasoningAgent",
+        "description": "ReasoningAgent agent",
+        "series": "c_series",
+        "version": "0.0.0",
+        "module": "agents.c_series.reasoning_agent"
+    },
+    {
+        "name": "DecisionMakingAgent",
+        "description": "DecisionMakingAgent agent",
+        "series": "c_series",
+        "version": "0.0.0",
+        "module": "agents.c_series.decision_making_agent"
+    },
+    {
+        "name": "KnowledgeGraphAgent",
+        "description": "KnowledgeGraphAgent agent",
+        "series": "c_series",
+        "version": "0.0.0",
+        "module": "agents.c_series.knowledge_graph_agent"
+    },
+    {
+        "name": "SimulationAgent",
+        "description": "SimulationAgent agent",
+        "series": "c_series",
+        "version": "0.0.0",
+        "module": "agents.c_series.simulation_agent"
+    },
+    {
+        "name": "ResearchAgent",
+        "description": "ResearchAgent agent",
+        "series": "c_series",
+        "version": "0.0.0",
+        "module": "agents.c_series.research_agent"
+    },
+    {
+        "name": "DataScienceAgent",
+        "description": "DataScienceAgent agent",
+        "series": "b_series",
+        "version": "0.0.0",
+        "module": "agents.b_series.data_science_agent"
+    },
+    {
+        "name": "LegalAgent",
+        "description": "LegalAgent agent",
+        "series": "b_series",
+        "version": "0.0.0",
+        "module": "agents.b_series.legal_agent"
+    },
+    {
+        "name": "ARVRAgent",
+        "description": "ARVRAgent agent",
+        "series": "b_series",
+        "version": "0.0.0",
+        "module": "agents.b_series.arvr_agent"
+    },
+    {
+        "name": "HRRecruitmentAgent",
+        "description": "HRRecruitmentAgent agent",
+        "series": "b_series",
+        "version": "0.0.0",
+        "module": "agents.b_series.hr_recruitment_agent"
+    },
+    {
+        "name": "BlockchainAgent",
+        "description": "BlockchainAgent agent",
+        "series": "b_series",
+        "version": "0.0.0",
+        "module": "agents.b_series.blockchain_agent"
+    },
+    {
+        "name": "DataMinerAgent",
+        "series": "a_series",
+        "version": "0.1.0",
+        "description": "Extracts, enriches, and transforms raw data from multiple sources into structured insights with ETL capabilities.",
+        "module": "agents.a_series.data_miner_agent"
+    },
+    {
+        "name": "ContextAgent",
+        "series": "a_series",
+        "version": "0.1.0",
+        "description": "Maintains conversation context, manages session state, and provides contextual awareness for other agents.",
+        "module": "agents.a_series.context_agent"
+    },
+    {
+        "name": "OptimizationAgent",
+        "series": "a_series",
+        "version": "0.1.0",
+        "description": "Continuously analyzes system performance and suggests optimizations for efficiency and cost reduction.",
+        "module": "agents.a_series.optimization_agent"
+    },
+    {
+        "name": "AnalyticsAgent",
+        "series": "a_series",
+        "version": "0.1.0",
+        "description": "Analyzes system performance, agent effectiveness, and provides data-driven insights for optimization.",
+        "module": "agents.a_series.__init__"
+    },
+    {
+        "name": "ContextAgent",
+        "series": "a_series",
+        "version": "0.1.0",
+        "description": "Maintains conversation context, manages session state, and provides contextual awareness for other agents.",
+        "module": "agents.a_series.__init__"
+    },
+    {
+        "name": "DataMinerAgent",
+        "series": "a_series",
+        "version": "0.1.0",
+        "description": "Extracts, enriches, and transforms raw data from multiple sources into structured insights with ETL capabilities.",
+        "module": "agents.a_series.__init__"
+    },
+    {
+        "name": "EvolutionAgent",
+        "series": "a_series",
+        "version": "0.1.0",
+        "description": "Continuously analyzes ecosystem performance and drives self-optimization through meta-learning and evolutionary algorithms.",
+        "module": "agents.a_series.__init__"
+    },
+    {
+        "name": "OptimizationAgent",
+        "series": "a_series",
+        "version": "0.1.0",
+        "description": "Continuously analyzes system performance and suggests optimizations for efficiency and cost reduction.",
+        "module": "agents.a_series.__init__"
+    },
+    {
+        "name": "PlannerAgent",
+        "series": "a_series",
+        "version": "0.1.0",
+        "description": "Strategically orchestrates goal-driven workflows across multiple agents with dependency resolution and failure recovery.",
+        "module": "agents.a_series.__init__"
+    },
+    {
+        "name": "SecurityAgent",
+        "series": "a_series",
+        "version": "0.1.0",
+        "description": "Analyzes security threats, validates inputs, and protects the Revenant ecosystem from malicious activity.",
+        "module": "agents.a_series.__init__"
+    },
+    {
+        "name": "EvolutionAgent",
+        "series": "a_series",
+        "version": "0.1.0",
+        "description": "Continuously analyzes ecosystem performance and drives self-optimization through meta-learning and evolutionary algorithms.",
+        "module": "agents.a_series.evolution_agent"
+    },
+    {
+        "name": "SecurityAgent",
+        "series": "a_series",
+        "version": "0.1.0",
+        "description": "Analyzes security threats, validates inputs, and protects the Revenant ecosystem from malicious activity.",
+        "module": "agents.a_series.security_agent"
+    },
+    {
+        "name": "PlannerAgent",
+        "series": "a_series",
+        "version": "0.1.0",
+        "description": "Strategically orchestrates goal-driven workflows across multiple agents with dependency resolution and failure recovery.",
+        "module": "agents.a_series.planner_agent"
+    },
+    {
+        "name": "AnalyticsAgent",
+        "series": "a_series",
+        "version": "0.1.0",
+        "description": "Analyzes system performance, agent effectiveness, and provides data-driven insights for optimization.",
+        "module": "agents.a_series.analytics_agent"
+    }
+]

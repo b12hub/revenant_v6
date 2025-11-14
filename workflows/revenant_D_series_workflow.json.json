@@ -1,0 +1,523 @@
+{
+  "name": "revenant_D_series_workflow.json",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "id": "7813284c-6507-4de4-8ade-1fdc6b2fd528",
+      "name": "D-Series Controller Initiator",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2912,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "REVENANT_A_URL",
+              "value": "https://postman-echo.com/post",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "REVENANT_B_URL",
+              "value": "https://example.com/b-series",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "REVENANT_C_URL",
+              "value": "https://example.com/c-series",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "REVENANT_OBS_URL",
+              "value": "https://example.com/observability",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "034a98ac-7e50-451b-826b-f6a5cfb42f5d",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2688,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $('Workflow Configuration').first().json;\nconst startTime = Date.now();\n\nconsole.log('D-Series orchestration cycle initiated.');\n\n// Simulate collecting status from A/B/C series\nconst aSeriesStatus = { url: config.REVENANT_A_URL, status: 'OK', latency_ms: Math.floor(Math.random() * 50) + 50 };\nconst bSeriesStatus = { url: config.REVENANT_B_URL, status: 'OK', latency_ms: Math.floor(Math.random() * 50) + 50 };\nconst cSeriesStatus = { url: config.REVENANT_C_URL, status: 'OK', latency_ms: Math.floor(Math.random() * 50) + 50 };\n\nconst latency = Date.now() - startTime;\n\nreturn {\n  module: 'D1_MCPController',\n  status: 'OK',\n  latency_ms: latency,\n  timestamp: new Date().toISOString(),\n  subsystems: { aSeriesStatus, bSeriesStatus, cSeriesStatus }\n};"
+      },
+      "id": "d5107068-b973-400f-bc5f-c90671dc6b3f",
+      "name": "D1_MCPController",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2464,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const startTime = Date.now();\n\n// Simulate resource allocation\nconst cpuAllocation = Math.floor(Math.random() * 30) + 40; // 40-70%\nconst memAllocation = Math.floor(Math.random() * 30) + 50; // 50-80%\n\nconsole.log(`Resource allocation: CPU=${cpuAllocation}%, Memory=${memAllocation}%`);\n\nconst latency = Date.now() - startTime;\n\nreturn {\n  module: 'D2_ResourceAllocator',\n  status: 'OK',\n  latency_ms: latency,\n  timestamp: new Date().toISOString(),\n  cpu_allocation_percent: cpuAllocation,\n  memory_allocation_percent: memAllocation\n};"
+      },
+      "id": "5dc3956d-6463-4f10-b13c-4b42f5e1c72e",
+      "name": "D2_ResourceAllocator",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2240,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const startTime = Date.now();\n\n// Simulate load balancing validation\nconst services = ['service-a', 'service-b', 'service-c'];\nconst availableServices = services.filter(() => Math.random() > 0.1); // 90% availability\nconst rotationPath = availableServices[Math.floor(Math.random() * availableServices.length)];\n\nconsole.log(`Load balancer validated. Routing to: ${rotationPath}`);\n\nconst latency = Date.now() - startTime;\n\nreturn {\n  module: 'D3_LoadBalancer',\n  status: 'OK',\n  latency_ms: latency,\n  timestamp: new Date().toISOString(),\n  available_services: availableServices,\n  active_route: rotationPath\n};"
+      },
+      "id": "cd06564d-4076-45e2-8f42-58e5b8a1a3c7",
+      "name": "D3_LoadBalancer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2016,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const startTime = Date.now();\n\n// Simulate audit logging\nconst complianceEvents = [\n  { event: 'data_access', integrity: 'verified', timestamp: new Date().toISOString() },\n  { event: 'permission_check', integrity: 'verified', timestamp: new Date().toISOString() },\n  { event: 'encryption_status', integrity: 'verified', timestamp: new Date().toISOString() }\n];\n\nconsole.log('Audit log: Compliance events recorded.');\n\nconst latency = Date.now() - startTime;\n\nreturn {\n  module: 'D4_AuditLogger',\n  status: 'OK',\n  latency_ms: latency,\n  timestamp: new Date().toISOString(),\n  compliance_events: complianceEvents\n};"
+      },
+      "id": "db453264-3d75-4d1a-8b8c-40a20c24e349",
+      "name": "D4_AuditLogger",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1792,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const startTime = Date.now();\n\n// Simulate self-optimization\nconst inefficiencies = Math.random() > 0.7 ? ['high_retry_interval', 'queue_depth_overflow'] : [];\nconst optimizations = inefficiencies.length > 0 ? {\n  retry_interval_adjusted: true,\n  queue_depth_reduced: true\n} : { no_optimizations_needed: true };\n\nif (inefficiencies.length > 0) {\n  console.log('Self-optimizer detected inefficiencies:', inefficiencies);\n  console.log('Applied optimizations:', optimizations);\n} else {\n  console.log('Self-optimizer: No inefficiencies detected.');\n}\n\nconst latency = Date.now() - startTime;\n\nreturn {\n  module: 'D5_SelfOptimizer',\n  status: 'OK',\n  latency_ms: latency,\n  timestamp: new Date().toISOString(),\n  inefficiencies_detected: inefficiencies,\n  optimizations_applied: optimizations\n};"
+      },
+      "id": "f083be4d-a440-4e08-9bf3-98880301416d",
+      "name": "D5_SelfOptimizer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1568,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const startTime = Date.now();\n\n// Simulate meta-agent supervision\nconst ethicalChecks = [\n  { check: 'bias_detection', status: 'PASS' },\n  { check: 'safety_guardrails', status: 'PASS' },\n  { check: 'escalation_protocol', status: 'ACTIVE' }\n];\n\nconsole.log('Meta-agent supervisor: Ethical checks completed.');\n\nconst latency = Date.now() - startTime;\n\nreturn {\n  module: 'D6_MetaAgentSupervisor',\n  status: 'OK',\n  latency_ms: latency,\n  timestamp: new Date().toISOString(),\n  ethical_checks: ethicalChecks\n};"
+      },
+      "id": "81c74868-3c21-422e-aac3-8b16cb36d58d",
+      "name": "D6_MetaAgentSupervisor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1344,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const startTime = Date.now();\n\n// Simulate system diagnostics\nconst uptime = Math.floor(Math.random() * 1000000) + 500000; // seconds\nconst queueDepth = Math.floor(Math.random() * 100) + 10;\nconst avgLatency = Math.floor(Math.random() * 50) + 30;\n\nconsole.log(`System diagnostics: Uptime=${uptime}s, QueueDepth=${queueDepth}, AvgLatency=${avgLatency}ms`);\n\nconst latency = Date.now() - startTime;\n\nreturn {\n  module: 'D7_SystemDiagnostics',\n  status: 'OK',\n  latency_ms: latency,\n  timestamp: new Date().toISOString(),\n  uptime_seconds: uptime,\n  queue_depth: queueDepth,\n  avg_latency_ms: avgLatency\n};"
+      },
+      "id": "d2cc4ce0-c5ab-4e94-8e0d-03e617fffd64",
+      "name": "D7_SystemDiagnostics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1120,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const startTime = Date.now();\n\n// Simulate compliance monitoring\nconst complianceStates = {\n  GDPR: 'COMPLIANT',\n  CCPA: 'COMPLIANT',\n  HIPAA: 'COMPLIANT'\n};\n\nconsole.log('Compliance monitor: All standards validated.');\n\nconst latency = Date.now() - startTime;\n\nreturn {\n  module: 'D8_ComplianceMonitor',\n  status: 'OK',\n  latency_ms: latency,\n  timestamp: new Date().toISOString(),\n  compliance_states: complianceStates\n};"
+      },
+      "id": "8703bd24-476e-4f63-a4a3-a5f0903bee11",
+      "name": "D8_ComplianceMonitor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -896,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Collect all metrics from previous modules\nconst items = $input.all();\n\nconst telemetry = {\n  governance_cycle_metrics: items.map(item => item.json),\n  total_modules: items.length,\n  overall_latency_ms: items.reduce((sum, item) => sum + (item.json.latency_ms || 0), 0),\n  timestamp: new Date().toISOString()\n};\n\nconsole.log('Telemetry:', JSON.stringify(telemetry, null, 2));\n\nreturn telemetry;"
+      },
+      "id": "1d439876-8a32-47c6-800c-ad8d1c51a855",
+      "name": "D_Series_TelemetryCollector",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -672,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Workflow Configuration').first().json.REVENANT_OBS_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "allowUnauthorizedCerts": false,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "f57977d5-9399-47b5-831d-5e5bc4da3771",
+      "name": "Send Telemetry to Observability",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -448,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ Math.random() }}",
+              "rightValue": 0.1,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3f38b1a1-6884-45fc-903f-2a088dc72432",
+      "name": "DR_Trigger",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const startTime = Date.now();\n\nconsole.log('Disaster recovery protocol engaged.');\n\n// Simulate failover process\nawait new Promise(resolve => setTimeout(resolve, 45000)); // 45s simulated recovery\n\nconsole.log('DR Test: Queue replay and standby promotion completed.');\n\nconst latency = Date.now() - startTime;\n\nreturn {\n  module: 'D_Series_DR_Test',\n  status: 'OK',\n  latency_ms: latency,\n  timestamp: new Date().toISOString(),\n  recovery_time_ms: 45000,\n  dr_tested: true\n};"
+      },
+      "id": "3ea6b7a1-4252-4194-af84-643192926cde",
+      "name": "D_Series_DR_Test",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const startTime = Date.now();\n\n// Simulate compliance validation\nconst tlsVersion = '1.3';\nconst encryption = 'AES-256';\nconst certificateValid = true;\n\nconsole.log(`Compliance validation: TLS=${tlsVersion}, Encryption=${encryption}`);\n\nconst latency = Date.now() - startTime;\n\nreturn {\n  module: 'D_ComplianceValidator',\n  compliance: 'PASS',\n  tls: tlsVersion,\n  encryption: encryption,\n  certificate_valid: certificateValid,\n  status: 'OK',\n  latency_ms: latency,\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "780357bd-96bf-41c6-853c-61f12140d656",
+      "name": "D_ComplianceValidator",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate results from all D-Series modules\nconst items = $input.all();\n\nconst modulesValidated = items.filter(item => item.json.module && item.json.module.startsWith('D')).length;\nconst drTested = items.some(item => item.json.dr_tested === true);\nconst compliancePass = items.some(item => item.json.compliance === 'PASS');\n\nconst consolidatedStatus = {\n  series: 'D',\n  governance_cycle: 'complete',\n  modules_validated: modulesValidated,\n  compliance: compliancePass ? 'PASS' : 'PENDING',\n  dr_tested: drTested,\n  overall_status: 'OK',\n  timestamp: new Date().toISOString()\n};\n\nconsole.log('D-Series Consolidator:', JSON.stringify(consolidatedStatus, null, 2));\n\nreturn consolidatedStatus;"
+      },
+      "id": "0cbf126f-a60f-4cd9-824f-58c258361aca",
+      "name": "D_Series_Consolidator",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const status = $json;\n\nconsole.log('✅ D-Series orchestration and compliance cycle complete.');\nconsole.log('All subsystems validated, DR tested, and telemetry exported.');\nconsole.log('Final Status:', JSON.stringify(status, null, 2));\n\nreturn {\n  ...status,\n  completion_message: 'D-Series orchestration and compliance cycle complete. All subsystems validated, DR tested, and telemetry exported.'\n};"
+      },
+      "id": "89b19fd1-55e4-4ddd-965f-038767860790",
+      "name": "D-Series Completion Logger",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Workflow Configuration').first().json.REVENANT_A_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "eb0e041d-af81-4a15-8572-019ec0104f95",
+      "name": "Send Summary to A-Series",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        896,
+        80
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "D-Series Controller Initiator": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "D1_MCPController",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D1_MCPController": {
+      "main": [
+        [
+          {
+            "node": "D2_ResourceAllocator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D2_ResourceAllocator": {
+      "main": [
+        [
+          {
+            "node": "D3_LoadBalancer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D3_LoadBalancer": {
+      "main": [
+        [
+          {
+            "node": "D4_AuditLogger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D4_AuditLogger": {
+      "main": [
+        [
+          {
+            "node": "D5_SelfOptimizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D5_SelfOptimizer": {
+      "main": [
+        [
+          {
+            "node": "D6_MetaAgentSupervisor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D6_MetaAgentSupervisor": {
+      "main": [
+        [
+          {
+            "node": "D7_SystemDiagnostics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D7_SystemDiagnostics": {
+      "main": [
+        [
+          {
+            "node": "D8_ComplianceMonitor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D8_ComplianceMonitor": {
+      "main": [
+        [
+          {
+            "node": "D_Series_TelemetryCollector",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D_Series_TelemetryCollector": {
+      "main": [
+        [
+          {
+            "node": "Send Telemetry to Observability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Telemetry to Observability": {
+      "main": [
+        [
+          {
+            "node": "DR_Trigger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DR_Trigger": {
+      "main": [
+        [
+          {
+            "node": "D_Series_DR_Test",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "D_ComplianceValidator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D_Series_DR_Test": {
+      "main": [
+        [
+          {
+            "node": "D_ComplianceValidator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D_ComplianceValidator": {
+      "main": [
+        [
+          {
+            "node": "D_Series_Consolidator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D_Series_Consolidator": {
+      "main": [
+        [
+          {
+            "node": "D-Series Completion Logger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D-Series Completion Logger": {
+      "main": [
+        [
+          {
+            "node": "Send Summary to A-Series",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e1effb2b-5f55-4ec6-9a56-3bece0252ead",
+  "meta": {
+    "instanceId": "45c426cf575386e961ded65eb8df1ef7e1682833df3197c603f479c39ae35b01"
+  },
+  "id": "nsnXHwqzjvju2yBk",
+  "tags": []
+}

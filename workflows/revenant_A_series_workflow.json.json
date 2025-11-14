@@ -1,0 +1,4595 @@
+{
+  "name": "revenant_A_series_workflow.json",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/d1/session/init",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "44a6259f-f638-4f31-bd4f-9c2998c292b2",
+      "name": "Voice/Text Input Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1360
+      ],
+      "webhookId": "0cfd4272-f01d-4da8-991d-37c623ac1c67"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "whisperApiUrl",
+              "value": "<__PLACEHOLDER_VALUE__Whisper API endpoint URL__>",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "maxRetries",
+              "value": 3,
+              "type": "number"
+            },
+            {
+              "id": "id-3",
+              "name": "searchApiUrl",
+              "value": "<__PLACEHOLDER_VALUE__Search API endpoint URL__>",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "imageGenApiUrl",
+              "value": "<__PLACEHOLDER_VALUE__Image generation API endpoint__>",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "productApiUrl",
+              "value": "<__PLACEHOLDER_VALUE__Product/affiliate API endpoint__>",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "socialApiUrl",
+              "value": "<__PLACEHOLDER_VALUE__Social media API endpoint__>",
+              "type": "string"
+            },
+            {
+              "id": "id-7",
+              "name": "embeddingApiUrl",
+              "value": "<__PLACEHOLDER_VALUE__Embedding API endpoint URL__>",
+              "type": "string"
+            },
+            {
+              "id": "id-8",
+              "name": "pineconeApiUrl",
+              "value": "<__PLACEHOLDER_VALUE__Pinecone API endpoint URL__>",
+              "type": "string"
+            },
+            {
+              "id": "id-9",
+              "name": "pineconeApiKey",
+              "value": "<__PLACEHOLDER_VALUE__Pinecone API key__>",
+              "type": "string"
+            },
+            {
+              "id": "id-10",
+              "name": "qualityThreshold",
+              "value": 7,
+              "type": "number"
+            },
+            {
+              "id": "id-11",
+              "name": "httpTimeout",
+              "value": 15000,
+              "type": "number"
+            },
+            {
+              "id": "id-12",
+              "name": "baseDelayMs",
+              "value": 1000,
+              "type": "number"
+            },
+            {
+              "id": "id-13",
+              "name": "mcpApiUrl",
+              "value": "<__PLACEHOLDER_VALUE__MCP-API dispatch endpoint__>",
+              "type": "string"
+            },
+            {
+              "id": "id-14",
+              "name": "alertWebhookUrl",
+              "value": "<__PLACEHOLDER_VALUE__Slack/Discord webhook URL__>",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "f2035c7b-ab84-4417-b9be-2683c5eedd66",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        1360
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.inputType }}",
+              "rightValue": "audio",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "49fd6150-0c93-4610-855d-bc2030f9b989",
+      "name": "Check Input Type",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        1360
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Workflow Configuration').first().json.whisperApiUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "multipart/form-data"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "audioData",
+        "options": {}
+      },
+      "id": "ab1094f4-806d-4d14-83bd-ac9ce82de901",
+      "name": "VoiceAgent - Transcribe Audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        672,
+        1296
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "userInput",
+              "value": "={{ $json.text || $json.transcription || $json.message }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "timestamp",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "sessionId",
+              "value": "={{ $json.sessionId || 'default' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "4ccfb69f-bf11-4fae-95b9-470d853efc80",
+      "name": "Normalize Input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        896,
+        1360
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "e5a180d3-0f08-4aee-9586-2f172354ec18",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1136,
+        1584
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "7c9bc170-c6f5-48a3-b009-eb634f51bdf2",
+      "name": "Conversation Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1264,
+        1584
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are the MasterAgent, responsible for understanding user intent and setting high-level goals. Analyze the user input: {{ $json.userInput }} and determine the primary objective. Provide a clear goal statement and context for downstream agents.",
+        "options": {}
+      },
+      "id": "30a2818f-8e73-4e4e-b8c9-38906c9afc73",
+      "name": "MasterAgent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1120,
+        1360
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "c128b4fc-cec9-43b3-acd5-d018ca1f1c24",
+      "name": "Classifier Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1488,
+        1584
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"agent_type\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"enum\": [\"dev\", \"writer\", \"search\", \"vision\", \"money\", \"post\", \"game\", \"email\", \"discord\", \"website\", \"mobileui\", \"livechat\"]\n\t\t},\n\t\t\"confidence\": {\n\t\t\t\"type\": \"number\"\n\t\t},\n\t\t\"reasoning\": {\n\t\t\t\"type\": \"string\"\n\t\t}\n\t},\n\t\"required\": [\"agent_type\", \"confidence\"]\n}"
+      },
+      "id": "a8e5b521-3ae8-4e05-8ef0-bea1104bdcc4",
+      "name": "Classification Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1616,
+        1584
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are the ClassifierAgent. Based on the goal from MasterAgent: {{ $('MasterAgent').item.json.output }}, classify which specialized agent should handle this task. Return JSON with fields: agent_type (dev/writer/search/vision/money/post), confidence (0-1), reasoning.",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "d3ea2594-827e-4c68-ab4b-a7afe8ab380c",
+      "name": "ClassifierAgent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1472,
+        1360
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.agent_type }}",
+                    "rightValue": "dev",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "dev"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.agent_type }}",
+                    "rightValue": "writer",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "writer"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.agent_type }}",
+                    "rightValue": "search",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "search"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.agent_type }}",
+                    "rightValue": "vision",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "vision"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.agent_type }}",
+                    "rightValue": "money",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "money"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.agent_type }}",
+                    "rightValue": "post",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "post"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bd1962b2-c71c-4736-9ccc-6e18440bc485",
+      "name": "Route to Sub-Agent",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        1824,
+        1456
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "00f6cec4-a504-4f03-99ca-094acf43784f",
+      "name": "DevAgent Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2064,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Execute JavaScript or Python code for technical tasks",
+        "jsCode": "return { result: \"Code execution ready\" }"
+      },
+      "id": "c88fcfe8-8301-4dad-ab2d-bd94c23f6eab",
+      "name": "Code Execution Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        2192,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are DevAgent, specialized in code generation, API integration, and technical tasks. Task: {{ $json.userInput }}. Use the code execution tool to write and test solutions. Return working code with explanations.",
+        "options": {}
+      },
+      "id": "a6e9d08b-b3d4-477d-adba-48b0a214eef2",
+      "name": "DevAgent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        2048,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "ff603ad9-9fa4-42de-9e68-ce6738987027",
+      "name": "WriterAgent Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2128,
+        1072
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are WriterAgent, expert in content creation, SEO optimization, and copywriting. Task: {{ $json.userInput }}. Create high-quality, engaging content optimized for the target audience. Include SEO keywords and formatting suggestions.",
+        "options": {}
+      },
+      "id": "73df240b-d5f2-4696-b742-98497e7ad423",
+      "name": "WriterAgent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        2048,
+        848
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "fcf32220-cb74-449e-93f7-fc157b53ae9e",
+      "name": "SearchAgent Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2064,
+        1472
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Search the web for current information",
+        "url": "={{ $('Workflow Configuration').first().json.searchApiUrl }}",
+        "options": {}
+      },
+      "id": "f4a3b186-79b4-4ea0-884e-5cededcc256e",
+      "name": "Web Search Tool",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        2192,
+        1472
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are SearchAgent, specialized in web research and information retrieval. Task: {{ $json.userInput }}. Use the web search tool to find accurate, up-to-date information. Synthesize findings into a comprehensive response with sources.",
+        "options": {}
+      },
+      "id": "0e95f5ff-38d4-446e-978f-d0424d3265a9",
+      "name": "SearchAgent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        2048,
+        1248
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "5876c248-5e4a-4e0c-9ad9-e7a118194ebd",
+      "name": "VisionAgent Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2064,
+        1872
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Generate images from text descriptions",
+        "method": "POST",
+        "url": "={{ $('Workflow Configuration').first().json.imageGenApiUrl }}",
+        "options": {}
+      },
+      "id": "3a0dfe90-8712-40b1-a389-dd9c19d93e13",
+      "name": "Image Generation Tool",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        2192,
+        1872
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are VisionAgent, specialized in image and video generation. Task: {{ $json.userInput }}. Use the image generation tool to create visual content based on descriptions. Provide detailed prompts and handle generation parameters.",
+        "options": {}
+      },
+      "id": "6d835fba-6d1a-4b7e-a03e-34b347d0b92d",
+      "name": "VisionAgent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        2048,
+        1648
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "16ae9b9d-a69b-4a9c-84d0-aa06ff8f70c7",
+      "name": "MoneyAgent Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2064,
+        2272
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Search products and generate affiliate links",
+        "url": "={{ $('Workflow Configuration').first().json.productApiUrl }}",
+        "options": {}
+      },
+      "id": "b94eeee7-f3c2-4698-b201-5aa59bcde7da",
+      "name": "Product API Tool",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        2192,
+        2272
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are MoneyAgent, expert in e-commerce, product recommendations, and affiliate marketing. Task: {{ $json.userInput }}. Use the product API tool to find relevant products, compare prices, and generate affiliate links. Provide value-driven recommendations.",
+        "options": {}
+      },
+      "id": "b9989b47-876e-448e-90ca-82d1fc832cbd",
+      "name": "MoneyAgent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        2048,
+        2048
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "aca961dc-e65e-4ffb-b6d6-0195af9e6d48",
+      "name": "PostAgent Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2064,
+        2784
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Post and manage social media content",
+        "method": "POST",
+        "url": "={{ $('Workflow Configuration').first().json.socialApiUrl }}",
+        "options": {}
+      },
+      "id": "34b1afa1-8e91-44c0-8450-6066672100d5",
+      "name": "Social Media API Tool",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        2192,
+        2784
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are PostAgent, specialized in social media content and automation. Task: {{ $json.userInput }}. Use the social media API tool to create, schedule, or post content across platforms. Optimize for engagement and platform-specific best practices.",
+        "options": {}
+      },
+      "id": "aade16b7-9316-4312-bb76-fd32bb432c6d",
+      "name": "PostAgent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        2048,
+        2560
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 6,
+        "options": {}
+      },
+      "id": "65e56351-a147-435c-8842-daac72d2d7d3",
+      "name": "Merge Agent Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2400,
+        1360
+      ]
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "agent_memory"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_id": "={{ $json.sessionId }}",
+            "agent_type": "={{ $json.agent_type }}",
+            "user_input": "={{ $json.userInput }}",
+            "agent_output": "={{ $json.output }}",
+            "timestamp": "={{ $json.timestamp }}",
+            "metadata": "={{ JSON.stringify($json) }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "c7a034ca-6a92-408c-9d65-663b90e76688",
+      "name": "MemoryAgent - Store Result",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3744,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "c46e4bab-a01d-4507-982d-258770a13028",
+      "name": "FeedbackAgent Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        15408
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:7000/api/feedback/evaluate",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "99af56b0-cd66-4d7f-abf5-db106d99c665",
+      "name": "FeedbackAgent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        896,
+        2960
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "boolean",
+                "operation": "false"
+              }
+            },
+            {
+              "id": "id-2",
+              "leftValue": "={{ $json.retryCount }}",
+              "rightValue": "={{ $('Workflow Configuration').first().json.maxRetries }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b2d6445f-7506-4e22-a703-48991407fa2a",
+      "name": "LoopAgent - Check Success",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1184,
+        2960
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "retryCount",
+              "value": "={{ ($json.retryCount || 0) + 1 }}",
+              "type": "number"
+            },
+            {
+              "id": "id-2",
+              "name": "feedbackContext",
+              "value": "={{ $json.feedback }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "improvementSuggestions",
+              "value": "={{ $json.improvement_suggestions }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "6feaf8b3-6998-457d-b807-5fb733d752cf",
+      "name": "Prepare Retry",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1536,
+        2880
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "status",
+              "value": "success",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "agent_type",
+              "value": "={{ $json.agent_type }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "result",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "quality_score",
+              "value": "={{ $json.quality_score }}",
+              "type": "number"
+            },
+            {
+              "id": "id-5",
+              "name": "session_id",
+              "value": "={{ $json.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "timestamp",
+              "value": "={{ $json.timestamp }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "68aff60d-98f2-4d7a-ae92-dfd975b46f46",
+      "name": "Format Final Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5312,
+        2960
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "cd052deb-0b63-4f43-987b-9625a2b0add5",
+      "name": "Return Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        5536,
+        2960
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "task_id",
+              "value": "={{ $now.toMillis() + '-' + $json.sessionId + '-' + Math.random().toString(36).substr(2, 9) }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "user_id",
+              "value": "={{ $json.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "intent",
+              "value": "={{ $json.userInput }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "task_type",
+              "value": "={{ $json.agent_type }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "status",
+              "value": "processing",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "attempt",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "id": "id-7",
+              "name": "parent_task_id",
+              "value": "null",
+              "type": "string"
+            },
+            {
+              "id": "id-8",
+              "name": "result_summary",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "61ca0269-fc52-4e0a-a6ad-aa74c888e0b9",
+      "name": "Generate Task Metadata",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2624,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "revenant_tasks"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.task_id }}",
+            "user_id": "={{ $json.user_id }}",
+            "intent": "={{ $json.intent }}",
+            "task_type": "={{ $json.task_type }}",
+            "agent": "={{ $json.agent_type }}",
+            "status": "={{ $json.status }}",
+            "result_summary": "={{ $json.result_summary }}",
+            "timestamp": "={{ $json.timestamp }}",
+            "attempt": "={{ $json.attempt }}",
+            "parent_task_id": "={{ $json.parent_task_id }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "6e07da1b-b88c-4b98-9805-fdce01721fa3",
+      "name": "Store Task Record",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2848,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Workflow Configuration').first().json.embeddingApiUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"text\": \"={{ $json.result_summary }}\"\n}",
+        "options": {
+          "timeout": "={{ $('Workflow Configuration').first().json.httpTimeout }}"
+        }
+      },
+      "id": "3ba020b4-5f58-46b1-933e-715f7a976625",
+      "name": "Generate Embedding",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3072,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Workflow Configuration').first().json.pineconeApiUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Api-Key",
+              "value": "={{ $('Workflow Configuration').first().json.pineconeApiKey }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"vectors\": [\n    {\n      \"id\": \"{{ $json.task_id }}\",\n      \"values\": {{ JSON.stringify($('Generate Embedding').first().json.embedding) }},\n      \"metadata\": {\n        \"task_id\": \"{{ $json.task_id }}\",\n        \"user_id\": \"{{ $json.user_id || $json.sessionId }}\",\n        \"agent\": \"{{ $json.agent_type }}\",\n        \"timestamp\": \"{{ $json.timestamp }}\"\n      }\n    }\n  ]\n}",
+        "options": {
+          "timeout": "={{ $('Workflow Configuration').first().json.httpTimeout }}"
+        }
+      },
+      "id": "bd914410-9b17-4838-9574-46b3eec03afd",
+      "name": "Store Vector in Pinecone",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3296,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "revenant_activity_log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "task_id": "={{ $json.task_id }}",
+            "node_name": "MemoryAgent",
+            "payload": "={{ JSON.stringify($json) }}",
+            "status": "success",
+            "duration_ms": "={{ $now.toMillis() - new Date($json.timestamp).getTime() }}",
+            "timestamp": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "b9943a4a-0415-4cc3-b292-05f066d9ed8d",
+      "name": "Log Activity",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3520,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "<__PLACEHOLDER_VALUE__LLM evaluation endpoint URL__>",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"prompt\": \"Evaluate output: {{ $json.output }}. Return JSON: {\\\"score\\\": 1-10, \\\"reasons\\\":[\\\"...\\\"], \\\"retry\\\": true|false, \\\"recommended_fix\\\":\\\"...\\\"}\"\n}",
+        "options": {
+          "timeout": "={{ $('Workflow Configuration').first().json.httpTimeout }}"
+        }
+      },
+      "id": "e17da2d3-a5c0-46de-ad12-31cd7d9c8841",
+      "name": "Quality Check LLM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3968,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse Quality Response from LLM\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  try {\n    // Extract the LLM response - it might be in different fields\n    let llmResponse = item.json.response || item.json.output || item.json.text || item.json;\n    \n    // If it's a string, try to parse it as JSON\n    if (typeof llmResponse === 'string') {\n      llmResponse = JSON.parse(llmResponse);\n    }\n    \n    // Extract quality check fields\n    const score = llmResponse.score || llmResponse.quality_score || 0;\n    const reasons = llmResponse.reasons || llmResponse.feedback || [];\n    const retry = llmResponse.retry || llmResponse.should_retry || false;\n    const recommended_fix = llmResponse.recommended_fix || llmResponse.improvement_suggestions || '';\n    \n    // Merge with existing data\n    results.push({\n      ...item.json,\n      quality_score: score,\n      quality_reasons: reasons,\n      should_retry: retry,\n      recommended_fix: recommended_fix,\n      quality_check_timestamp: new Date().toISOString()\n    });\n  } catch (error) {\n    // If parsing fails, return original data with error flag\n    results.push({\n      ...item.json,\n      quality_score: 0,\n      quality_reasons: ['Failed to parse quality response'],\n      should_retry: true,\n      recommended_fix: 'Unable to parse LLM response',\n      parse_error: error.message,\n      quality_check_timestamp: new Date().toISOString()\n    });\n  }\n}\n\nreturn results;"
+      },
+      "id": "404f75dd-b992-4c93-8e40-8ed11efd7e28",
+      "name": "Parse Quality Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4192,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "revenant_feedback"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "task_id": "={{ $json.task_id }}",
+            "score": "={{ $json.score }}",
+            "reasons": "={{ JSON.stringify($json.reasons) }}",
+            "retry": "={{ $json.retry }}",
+            "recommended_fix": "={{ $json.recommended_fix }}",
+            "timestamp": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "c32b193a-32f1-4e0e-8ac0-84b968d60960",
+      "name": "Store Feedback Record",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4416,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Workflow Configuration').first().json.pineconeApiUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Api-Key",
+              "value": "={{ $('Workflow Configuration').first().json.pineconeApiKey }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"task_id\": \"{{ $json.task_id }}\",\n  \"score\": {{ $json.quality_score }},\n  \"reasons\": {{ JSON.stringify($json.improvement_suggestions) }},\n  \"feedback\": \"{{ $json.feedback }}\",\n  \"timestamp\": \"{{ $json.timestamp }}\"\n}",
+        "options": {
+          "timeout": "={{ $('Workflow Configuration').first().json.httpTimeout }}"
+        }
+      },
+      "id": "c2be3ee3-d873-4659-9799-8508179c4f4e",
+      "name": "Store Feedback Vector",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        4640,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.score }}",
+              "rightValue": "={{ $('Workflow Configuration').first().json.qualityThreshold }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "bede6ac8-d2fc-42dd-8866-7543bd6ba264",
+      "name": "Check Quality Threshold",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4864,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "revenant_tasks"
+        },
+        "where": {
+          "values": [
+            {
+              "column": "id",
+              "value": "={{ $json.task_id }}"
+            }
+          ]
+        },
+        "options": {
+          "outputColumns": [
+            "attempt"
+          ],
+          "largeNumbersOutput": "text"
+        }
+      },
+      "id": "f7beaa11-fa09-4a41-a2c2-311af665971a",
+      "name": "Read Retry Attempts",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        5088,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.attempt }}",
+              "rightValue": "={{ $('Workflow Configuration').first().json.maxRetries }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "78f08001-f0b7-44b6-bf58-6ccbc3582115",
+      "name": "Check Max Retries",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        5312,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const attempt = $input.first().json.attempt || 0;\nconst baseDelay = $('Workflow Configuration').first().json.baseDelayMs;\nconst delay = Math.pow(2, attempt) * baseDelay;\nreturn [{ json: { ...$input.first().json, waitTime: delay } }];"
+      },
+      "id": "f4c9195c-3439-49df-9b22-818977151aaa",
+      "name": "Calculate Exponential Backoff",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5536,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "amount": "={{ $json.waitTime / 1000 }}"
+      },
+      "id": "e079af12-8727-47ab-aeb9-70b27f6f0a09",
+      "name": "Wait Before Retry",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        5760,
+        1328
+      ],
+      "webhookId": "486bffef-bf08-4d66-ae00-b167c34ea73d"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "revenant_tasks"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "attempt": "={{ $json.attempt + 1 }}",
+            "status": "retrying"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "attempt",
+              "displayName": "attempt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f7f16080-200a-4686-af8b-c1f6fb775c4f",
+      "name": "Increment Retry Counter",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        5984,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Workflow Configuration').first().json.mcpApiUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-REVENANT-SIGNATURE",
+              "value": "<__PLACEHOLDER_VALUE__JWT signature__>"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "task_id",
+              "value": "={{ $json.task_id }}"
+            },
+            {
+              "name": "agent_type",
+              "value": "={{ $json.agent_type }}"
+            },
+            {
+              "name": "userInput",
+              "value": "={{ $json.userInput }}"
+            },
+            {
+              "name": "feedbackContext",
+              "value": "={{ $json.feedbackContext }}"
+            },
+            {
+              "name": "improvementSuggestions",
+              "value": "={{ $json.improvementSuggestions }}"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {}
+          },
+          "redirect": {
+            "redirect": {}
+          },
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": "={{ $('Workflow Configuration').first().json.httpTimeout }}"
+        }
+      },
+      "id": "40b6a444-6006-4b07-ab46-efcd35a98526",
+      "name": "Dispatch Retry via MCP-API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        6208,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "name",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "revenant_tasks"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "failed",
+            "result_summary": "={{ 'Max retries exceeded: ' + $json.recommended_fix }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "result_summary",
+              "displayName": "result_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dd8eddd0-ae9d-4976-8092-6f623989ed76",
+      "name": "Mark Task Failed",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        5536,
+        2592
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Workflow Configuration').first().json.alertWebhookUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"task_id\": \"{{ $json.task_id || $json.sessionId }}\",\n  \"agent_type\": \"{{ $json.agent_type }}\",\n  \"quality_score\": {{ $json.quality_score || 0 }},\n  \"failure_reason\": \"{{ $json.feedback || 'Task failed after maximum retry attempts' }}\",\n  \"timestamp\": \"{{ $now.toISO() }}\",\n  \"retry_count\": {{ $json.retryCount || 0 }}\n}",
+        "options": {
+          "allowUnauthorizedCerts": false
+        }
+      },
+      "id": "6b5f1255-dbd1-4f38-8621-4cfc79a5f27d",
+      "name": "Send Failure Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        5760,
+        2592
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fallback to Local Storage when Postgres/Pinecone is down\nconst fs = require('fs');\nconst path = require('path');\n\n// Get task data from input\nconst items = $input.all();\nconst taskData = items.map(item => item.json);\n\n// Define fallback storage path\nconst fallbackDir = '/tmp/n8n-fallback';\nconst fallbackFile = path.join(fallbackDir, `task-${Date.now()}.json`);\n\ntry {\n  // Create directory if it doesn't exist\n  if (!fs.existsSync(fallbackDir)) {\n    fs.mkdirSync(fallbackDir, { recursive: true });\n  }\n  \n  // Write task data to local JSON file\n  fs.writeFileSync(fallbackFile, JSON.stringify({\n    timestamp: new Date().toISOString(),\n    tasks: taskData,\n    status: 'fallback_stored'\n  }, null, 2));\n  \n  console.log(`Fallback storage successful: ${fallbackFile}`);\n  \n  return items.map(item => ({\n    json: {\n      ...item.json,\n      fallback_status: 'success',\n      fallback_file: fallbackFile,\n      storage_mode: 'local_json',\n      message: 'Task data stored in local fallback storage'\n    }\n  }));\n  \n} catch (error) {\n  console.error('Fallback storage failed:', error);\n  \n  return items.map(item => ({\n    json: {\n      ...item.json,\n      fallback_status: 'error',\n      error_message: error.message,\n      storage_mode: 'failed'\n    }\n  }));\n}"
+      },
+      "id": "fa6d5470-56fe-4813-ba41-88d455205ceb",
+      "name": "Fallback to Local Storage",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        15616
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "revenant_tasks"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "completed",
+            "result_summary": "={{ $json.output }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "result_summary",
+              "displayName": "result_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b6439c63-8d2b-4a81-b6d9-92e476e89c86",
+      "name": "Update Task Status",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        5088,
+        2784
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:7000/api/memory/save",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "3f07708b-d347-4132-b9e0-e111d0f8fc2c",
+      "name": "MemoryAgent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const item = items[0];\nconst data = item.json;\nconst feedback = data.feedback || {score:10, retry:false};\nif(feedback.retry){\n  return [{json:{action:'retry', task_id:data.task_id}}];\n}\nreturn [{json:{action:'ok', task_id:data.task_id}}];"
+      },
+      "id": "abeac393-def2-4de9-8e0e-25e6903475c5",
+      "name": "LoopAgentFunction",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        0,
+        10736
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "32f08ba4-1f6d-42e2-8058-e40b677f64f9",
+      "name": "WaitBackoff",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        0,
+        12080
+      ],
+      "webhookId": "a704a8bf-d671-42aa-9bb8-0bfdc9483f23"
+    },
+    {
+      "parameters": {
+        "path": "api/mcp/dispatch",
+        "options": {}
+      },
+      "id": "eedf3a51-f388-46b5-8030-4b24252f29e9",
+      "name": "MCP-API Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        13632
+      ],
+      "webhookId": "d79c221f-303d-412c-8c29-4e9b26d9ddeb"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "4f64c74a-beb7-462c-a927-1d22b313bba8",
+      "name": "SplitInBatches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        0,
+        13856
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json[\"endpoint\"] || \"http://localhost:5000/agent\" }}",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "3f3c056a-4189-4e30-83a4-ba14f7edbb37",
+      "name": "DispatchHTTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        14512
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "b1d752ed-fa7e-48cf-a8f2-9aeeb11f0338",
+      "name": "MergeResults",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 1,
+      "position": [
+        0,
+        14736
+      ]
+    },
+    {
+      "parameters": {
+        "table": "revenant_metrics",
+        "columns": [
+          {
+            "name": "task_id",
+            "value": "={{ $json[\"task_id\"] }}"
+          },
+          {
+            "name": "stage",
+            "value": "={{ $json[\"stage\"] || 'dispatch' }}"
+          },
+          {
+            "name": "status",
+            "value": "={{ $json[\"status\"] || 'ok' }}"
+          },
+          {
+            "name": "duration_ms",
+            "value": "={{ $json[\"duration_ms\"] || 0 }}"
+          }
+        ],
+        "additionalFields": {}
+      },
+      "id": "fdf1c083-784c-4ffc-a2a1-09ca8c00580a",
+      "name": "ObservabilityPostgres",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        0,
+        14960
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:7000/api/logs/activity",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "cb1aadd6-a58e-4349-9f6a-836d97d6ddc6",
+      "name": "ActivityLog",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        15184
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "id": "d28d7299-8944-4767-b466-e3f49e944f07",
+      "name": "5-Min System Health Monitor",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        15840
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build System State JSON from Agent Performance and Health Data\nconst items = $input.all();\n\n// Get data from previous nodes\nconst performanceScores = items.filter(item => item.json.agent_type && item.json.performance_score);\nconst healthSnapshots = items.filter(item => item.json.snapshot_type === 'health');\n\n// Build agent states summary\nconst agentStates = {};\nconst agentTypes = ['dev', 'writer', 'search', 'vision', 'money', 'post'];\n\nfor (const agentType of agentTypes) {\n  const agentData = performanceScores.find(item => item.json.agent_type === agentType);\n  \n  agentStates[agentType] = {\n    status: agentData?.json.status || 'idle',\n    performance_score: agentData?.json.performance_score || 0,\n    tasks_completed: agentData?.json.tasks_completed || 0,\n    avg_quality_score: agentData?.json.avg_quality_score || 0,\n    success_rate: agentData?.json.success_rate || 0,\n    last_active: agentData?.json.last_active || null\n  };\n}\n\n// Calculate overall system metrics\nconst totalTasks = performanceScores.reduce((sum, item) => sum + (item.json.tasks_completed || 0), 0);\nconst avgPerformance = performanceScores.length > 0 \n  ? performanceScores.reduce((sum, item) => sum + (item.json.performance_score || 0), 0) / performanceScores.length \n  : 0;\nconst avgQuality = performanceScores.length > 0\n  ? performanceScores.reduce((sum, item) => sum + (item.json.avg_quality_score || 0), 0) / performanceScores.length\n  : 0;\n\n// Get latest health snapshot\nconst latestHealth = healthSnapshots.length > 0 \n  ? healthSnapshots.sort((a, b) => new Date(b.json.timestamp) - new Date(a.json.timestamp))[0].json\n  : {};\n\n// Build memory summary\nconst memorySummary = {\n  total_tasks_stored: latestHealth.total_tasks || 0,\n  vector_count: latestHealth.vector_count || 0,\n  avg_embedding_quality: latestHealth.avg_embedding_quality || 0,\n  memory_usage_mb: latestHealth.memory_usage_mb || 0\n};\n\n// Build progress metrics\nconst progressMetrics = {\n  tasks_in_progress: latestHealth.tasks_in_progress || 0,\n  tasks_pending: latestHealth.tasks_pending || 0,\n  tasks_failed: latestHealth.tasks_failed || 0,\n  retry_queue_size: latestHealth.retry_queue_size || 0\n};\n\n// Construct final system state JSON\nconst systemState = {\n  timestamp: new Date().toISOString(),\n  system_health: {\n    status: latestHealth.system_status || 'healthy',\n    uptime_hours: latestHealth.uptime_hours || 0,\n    cpu_usage_percent: latestHealth.cpu_usage_percent || 0,\n    memory_usage_percent: latestHealth.memory_usage_percent || 0\n  },\n  agent_states: agentStates,\n  memory_summary: memorySummary,\n  progress_metrics: progressMetrics,\n  overall_metrics: {\n    total_tasks_completed: totalTasks,\n    avg_performance_score: Math.round(avgPerformance * 100) / 100,\n    avg_quality_score: Math.round(avgQuality * 100) / 100,\n    system_efficiency: Math.round((avgPerformance * avgQuality) * 100) / 100\n  }\n};\n\nconsole.log('System State Built:', JSON.stringify(systemState, null, 2));\n\nreturn [{ json: systemState }];"
+      },
+      "id": "b0f21e98-baff-4763-9453-d25c50e4292f",
+      "name": "Build System State JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        15840
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "name",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "agent_performance_scores"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "id": "5c9133c4-4fc4-420e-8017-857d0dfdd51e",
+      "name": "Read Agent Performance Scores",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        224,
+        15840
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "name",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "system_health_snapshots"
+        },
+        "limit": 10,
+        "sort": {
+          "values": [
+            {
+              "column": "timestamp",
+              "direction": "DESC"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "53cdad66-715c-4db1-af2d-0406e11baf38",
+      "name": "Read System Health Snapshots",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        448,
+        15840
+      ]
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "name",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "system_health_snapshots"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "system_state": "={{ JSON.stringify($json) }}",
+            "timestamp": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "79ebdf5e-889a-486a-90f1-8568f48243c4",
+      "name": "Store System Health Snapshot",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        896,
+        15840
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "<__PLACEHOLDER_VALUE__SupervisorAgent API endpoint__>",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "bd73f23a-4887-4c03-948b-a286215377f3",
+      "name": "Send to SupervisorAgent API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1120,
+        15840
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "event-bus/task-assigned",
+        "options": {}
+      },
+      "id": "d0548e7e-556e-4af2-9683-22571324402a",
+      "name": "Event Bus - TASK_ASSIGNED",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        16064
+      ],
+      "webhookId": "28bc0655-b541-480e-8b48-733e4ea290fc"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "event-bus/result-ready",
+        "options": {}
+      },
+      "id": "e5386a14-d0e4-476d-957c-1813e04e6b3b",
+      "name": "Event Bus - RESULT_READY",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        16256
+      ],
+      "webhookId": "5d60a42f-6e25-47fb-8ae7-a42745c9ae7e"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "event-bus/needs-review",
+        "options": {}
+      },
+      "id": "7f9c971e-d5cb-4c8c-a679-6d76f96d4690",
+      "name": "Event Bus - NEEDS_REVIEW",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        16448
+      ],
+      "webhookId": "d86b6834-9349-467a-8c5a-db898d92403f"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "name",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "agent_collaboration_events"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event_type": "={{ $json.event_type }}",
+            "source_agent": "={{ $json.source_agent }}",
+            "target_agent": "={{ $json.target_agent }}",
+            "payload": "={{ JSON.stringify($json.payload || $json) }}",
+            "timestamp": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "35e60f3c-1771-4841-ad5d-7dc938d70c48",
+      "name": "Log Collaboration Event",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        224,
+        16256
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "<__PLACEHOLDER_VALUE__WriterAgent API endpoint for code documentation__>",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ code_output: $json.output, agent_type: 'dev', task_id: $json.task_id }) }}",
+        "options": {}
+      },
+      "id": "99ffe84a-c460-4cc1-a471-f4f075f37e6a",
+      "name": "DevAgent → WriterAgent Bridge",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2400,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "<__PLACEHOLDER_VALUE__WriterAgent API endpoint for visual content__>",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ image_data: $json.output || $json.image_url, task_id: $json.task_id, context: $json.userInput }) }}",
+        "options": {}
+      },
+      "id": "5b2cb6d8-65ae-4898-acf7-75c2852adc8b",
+      "name": "VisionAgent → WriterAgent Bridge",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2400,
+        2288
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "<__PLACEHOLDER_VALUE__PostAgent API endpoint for campaign reports__>",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "8cdff0cf-9442-4552-a68a-45f49bb322fd",
+      "name": "MoneyAgent → PostAgent Bridge",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2400,
+        2688
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ]
+            }
+          ]
+        }
+      },
+      "id": "58bf5a56-6033-45c1-b92a-cc4135ff4704",
+      "name": "Weekly SearchAgent → GameAgent Sync",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        16672
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "<__PLACEHOLDER_VALUE__GameAgent API endpoint for creative ideation__>",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ search_insights: $json }) }}",
+        "options": {}
+      },
+      "id": "b239ad48-7b62-48f2-9914-987687bf4a7d",
+      "name": "SearchAgent → GameAgent Bridge",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        448,
+        16672
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Agent Self-Assessment Logic\n// Calculate performance scores based on task completion, quality metrics, and execution time\n\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  try {\n    const data = item.json;\n    \n    // Extract metrics from the agent result\n    const qualityScore = data.quality_score || 0;\n    const executionTime = data.duration_ms || 0;\n    const taskCompleted = data.status === 'completed' || data.status === 'success';\n    const agentType = data.agent_type || 'unknown';\n    \n    // Calculate component scores (0-100 scale)\n    \n    // 1. Quality Score (40% weight) - already on 0-10 scale, convert to 0-100\n    const qualityComponent = (qualityScore / 10) * 100;\n    \n    // 2. Completion Score (30% weight)\n    const completionComponent = taskCompleted ? 100 : 0;\n    \n    // 3. Efficiency Score (30% weight) - based on execution time\n    // Assume optimal time is under 5 seconds (5000ms), max acceptable is 30 seconds\n    let efficiencyComponent = 100;\n    if (executionTime > 5000) {\n      efficiencyComponent = Math.max(0, 100 - ((executionTime - 5000) / 250));\n    }\n    \n    // Calculate weighted overall score\n    const overallScore = (\n      (qualityComponent * 0.4) +\n      (completionComponent * 0.3) +\n      (efficiencyComponent * 0.3)\n    );\n    \n    // Determine performance tier\n    let performanceTier = 'poor';\n    if (overallScore >= 90) performanceTier = 'excellent';\n    else if (overallScore >= 75) performanceTier = 'good';\n    else if (overallScore >= 60) performanceTier = 'average';\n    else if (overallScore >= 40) performanceTier = 'below_average';\n    \n    // Generate improvement suggestions\n    const suggestions = [];\n    if (qualityComponent < 70) {\n      suggestions.push('Improve output quality and accuracy');\n    }\n    if (efficiencyComponent < 70) {\n      suggestions.push('Optimize execution time and resource usage');\n    }\n    if (!taskCompleted) {\n      suggestions.push('Focus on task completion rate');\n    }\n    \n    // Build assessment result\n    results.push({\n      json: {\n        ...data,\n        self_assessment: {\n          agent_type: agentType,\n          overall_score: Math.round(overallScore * 100) / 100,\n          performance_tier: performanceTier,\n          component_scores: {\n            quality: Math.round(qualityComponent * 100) / 100,\n            completion: completionComponent,\n            efficiency: Math.round(efficiencyComponent * 100) / 100\n          },\n          metrics: {\n            quality_score: qualityScore,\n            execution_time_ms: executionTime,\n            task_completed: taskCompleted\n          },\n          improvement_suggestions: suggestions,\n          timestamp: new Date().toISOString()\n        }\n      }\n    });\n    \n  } catch (error) {\n    // Handle errors gracefully\n    results.push({\n      json: {\n        ...item.json,\n        self_assessment: {\n          error: error.message,\n          overall_score: 0,\n          performance_tier: 'error',\n          timestamp: new Date().toISOString()\n        }\n      }\n    });\n  }\n}\n\nreturn results;"
+      },
+      "id": "fb9d0488-f513-4b34-837b-85d8719355e2",
+      "name": "Agent Self-Assessment Logic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2624,
+        2192
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "name",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "agent_performance_scores"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "agent_type": "={{ $json.agent_type }}",
+            "performance_score": "={{ $json.performance_score }}",
+            "timestamp": "={{ $json.timestamp }}"
+          },
+          "matchingColumns": [
+            "agent_type"
+          ],
+          "schema": [
+            {
+              "id": "agent_type",
+              "displayName": "agent_type",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "performance_score",
+              "displayName": "performance_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b5874dec-141b-4743-bb1e-cd282befc3eb",
+      "name": "Update Performance Scores",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2848,
+        2192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Dynamic Agent Prioritization based on Performance Scores\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  try {\n    // Get the classified agent type from ClassifierAgent\n    const classifiedAgent = item.json.agent_type;\n    const confidence = item.json.confidence || 0;\n    \n    // Fetch performance scores from MemoryAgent (simulated - in production this would query the database)\n    // In a real implementation, you would query the revenant_feedback table or agent_performance table\n    const performanceScores = {\n      dev: 8.5,\n      writer: 9.2,\n      search: 7.8,\n      vision: 8.0,\n      money: 7.5,\n      post: 8.8\n    };\n    \n    // Calculate priority score: (confidence * 0.6) + (performance_score * 0.4)\n    const agentScore = (confidence * 0.6) + ((performanceScores[classifiedAgent] || 5) / 10 * 0.4);\n    \n    // Determine if we should override the classification based on performance\n    let finalAgent = classifiedAgent;\n    let overridden = false;\n    \n    // If confidence is low (<0.6) and another agent has significantly better performance, suggest override\n    if (confidence < 0.6) {\n      const sortedAgents = Object.entries(performanceScores)\n        .sort((a, b) => b[1] - a[1])\n        .map(([agent, score]) => ({ agent, score }));\n      \n      const topAgent = sortedAgents[0];\n      if (topAgent.score > (performanceScores[classifiedAgent] || 0) + 1.5) {\n        finalAgent = topAgent.agent;\n        overridden = true;\n      }\n    }\n    \n    results.push({\n      ...item.json,\n      agent_type: finalAgent,\n      original_agent: classifiedAgent,\n      priority_score: agentScore,\n      performance_score: performanceScores[finalAgent] || 5,\n      was_overridden: overridden,\n      prioritization_timestamp: new Date().toISOString(),\n      all_agent_scores: performanceScores\n    });\n    \n  } catch (error) {\n    console.error('Prioritization error:', error);\n    results.push({\n      ...item.json,\n      prioritization_error: error.message,\n      priority_score: 0.5\n    });\n  }\n}\n\nreturn results;"
+      },
+      "id": "99ff26b3-7ec9-4820-ad66-089a03b94cfd",
+      "name": "Dynamic Agent Prioritization",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1824,
+        2688
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "api/task",
+        "options": {}
+      },
+      "id": "eb508695-8eeb-48e9-8103-aeea93a2c22a",
+      "name": "Frontend - /api/task",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        16896
+      ],
+      "webhookId": "5dc154a6-71f7-4e7d-9cb4-8653d19997ff"
+    },
+    {
+      "parameters": {
+        "path": "api/status",
+        "options": {}
+      },
+      "id": "636ecc40-7158-43ff-8600-047f92f41b4d",
+      "name": "Frontend - /api/status",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        17120
+      ],
+      "webhookId": "f6763468-93be-4e2e-8753-dafb146ecc59"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validate Access Token from Request Headers\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  try {\n    // Extract token from headers (common patterns)\n    const headers = item.json.headers || {};\n    const authHeader = headers.authorization || headers.Authorization || '';\n    \n    // Extract token from Authorization header (Bearer token pattern)\n    let token = '';\n    if (authHeader.startsWith('Bearer ')) {\n      token = authHeader.substring(7);\n    } else if (authHeader) {\n      token = authHeader;\n    }\n    \n    // Also check for token in query params or body as fallback\n    if (!token) {\n      token = item.json.query?.token || item.json.body?.token || item.json.token || '';\n    }\n    \n    // Get expected token from environment variable\n    // In production, this should check against a database or JWT validation\n    const expectedToken = $env.ACCESS_TOKEN || process.env.ACCESS_TOKEN || '';\n    \n    // Validate token\n    let isValid = false;\n    let validationMessage = '';\n    \n    if (!token) {\n      validationMessage = 'No token provided';\n    } else if (!expectedToken) {\n      validationMessage = 'Server configuration error: no expected token set';\n    } else if (token === expectedToken) {\n      isValid = true;\n      validationMessage = 'Token is valid';\n    } else {\n      validationMessage = 'Invalid token';\n    }\n    \n    // Return validation result\n    results.push({\n      json: {\n        ...item.json,\n        isValid: isValid,\n        validationMessage: validationMessage,\n        tokenProvided: !!token,\n        timestamp: new Date().toISOString()\n      }\n    });\n    \n  } catch (error) {\n    // Handle validation errors\n    results.push({\n      json: {\n        ...item.json,\n        isValid: false,\n        validationMessage: `Token validation error: ${error.message}`,\n        tokenProvided: false,\n        error: error.message,\n        timestamp: new Date().toISOString()\n      }\n    });\n  }\n}\n\nreturn results;"
+      },
+      "id": "97c37006-57f6-4ff3-9399-de51ea1ff88c",
+      "name": "Validate Access Token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        16896
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.isValid }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "556fa20c-2ca8-4605-9244-06c77305e75a",
+      "name": "Check Token Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        16896
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"error\": \"Unauthorized access\"\n}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "id": "7295f046-6378-4a0f-b373-9d63b2ee4745",
+      "name": "Return Unauthorized",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        672,
+        16896
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "name",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "system_health_snapshots"
+        },
+        "limit": 1,
+        "sort": {
+          "values": [
+            {
+              "column": "timestamp",
+              "direction": "DESC"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f58384b0-5e83-4d2b-a1f6-cea80ea6e462",
+      "name": "Fetch Real-Time Status",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        224,
+        17120
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "status",
+              "value": "online",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "agents",
+              "value": "={{ $('Fetch Real-Time Status').item.json.agents }}",
+              "type": "array"
+            },
+            {
+              "id": "id-3",
+              "name": "timestamp",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "system_health",
+              "value": "={{ $('Fetch Real-Time Status').item.json.system_health }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f767bdc9-905c-4879-9ba9-37d85b338913",
+      "name": "Format Status Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        17120
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "056547b3-2cea-474c-b855-a58a3ce76968",
+      "name": "Return Status JSON",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        672,
+        17120
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// SupervisorAgent - Loop Detection Logic\n// Detects infinite loops by analyzing task execution patterns\n\nconst items = $input.all();\nconst results = [];\n\n// Configuration thresholds\nconst MAX_EXECUTION_TIME_MS = 300000; // 5 minutes\nconst MAX_RETRY_COUNT = 5;\nconst DUPLICATE_WINDOW_MS = 60000; // 1 minute\n\nfor (const item of items) {\n  const taskData = item.json;\n  \n  // Initialize loop detection flags\n  let loopDetected = false;\n  let loopType = null;\n  let loopReason = '';\n  \n  try {\n    // 1. Check for repeated task IDs with same parameters\n    const taskId = taskData.task_id || taskData.id;\n    const taskParams = JSON.stringify({\n      userInput: taskData.userInput,\n      agent_type: taskData.agent_type\n    });\n    \n    // Check if this exact task has been seen recently\n    const recentTasks = taskData.recent_tasks || [];\n    const duplicates = recentTasks.filter(t => \n      t.task_id === taskId && \n      JSON.stringify({ userInput: t.userInput, agent_type: t.agent_type }) === taskParams\n    );\n    \n    if (duplicates.length > 2) {\n      loopDetected = true;\n      loopType = 'duplicate_task';\n      loopReason = `Task ${taskId} repeated ${duplicates.length} times with identical parameters`;\n    }\n    \n    // 2. Identify stuck processes based on execution time\n    const startTime = taskData.timestamp ? new Date(taskData.timestamp).getTime() : Date.now();\n    const currentTime = Date.now();\n    const executionTime = currentTime - startTime;\n    \n    if (executionTime > MAX_EXECUTION_TIME_MS) {\n      loopDetected = true;\n      loopType = 'execution_timeout';\n      loopReason = `Task ${taskId} exceeded maximum execution time (${executionTime}ms > ${MAX_EXECUTION_TIME_MS}ms)`;\n    }\n    \n    // 3. Check retry count threshold\n    const retryCount = taskData.retryCount || taskData.attempt || 0;\n    if (retryCount >= MAX_RETRY_COUNT) {\n      loopDetected = true;\n      loopType = 'excessive_retries';\n      loopReason = `Task ${taskId} exceeded maximum retry count (${retryCount} >= ${MAX_RETRY_COUNT})`;\n    }\n    \n    // 4. Detect circular dependencies in agent calls\n    const agentCallChain = taskData.agent_call_chain || [];\n    const chainSet = new Set(agentCallChain);\n    if (agentCallChain.length > chainSet.size + 2) {\n      loopDetected = true;\n      loopType = 'circular_dependency';\n      loopReason = `Circular agent call pattern detected: ${agentCallChain.join(' → ')}`;\n    }\n    \n    // Build result object\n    results.push({\n      json: {\n        ...taskData,\n        loop_detected: loopDetected,\n        loop_type: loopType,\n        loop_reason: loopReason,\n        execution_time_ms: executionTime,\n        retry_count: retryCount,\n        supervisor_action: loopDetected ? 'kill_and_restart' : 'continue',\n        supervisor_timestamp: new Date().toISOString()\n      }\n    });\n    \n  } catch (error) {\n    console.error('Loop detection error:', error);\n    results.push({\n      json: {\n        ...taskData,\n        loop_detected: false,\n        loop_type: 'detection_error',\n        loop_reason: error.message,\n        supervisor_action: 'manual_review',\n        supervisor_timestamp: new Date().toISOString()\n      }\n    });\n  }\n}\n\nreturn results;"
+      },
+      "id": "b079cf8d-a45c-452e-9194-647bb71c4227",
+      "name": "SupervisorAgent - Loop Detection",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        15840
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.loop_detected }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "761d39ac-9cc8-4fa6-88ff-9031236ffa27",
+      "name": "Check for Infinite Loops",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1568,
+        15840
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "<__PLACEHOLDER_VALUE__Process termination endpoint__>",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"process_id\": \"{{ $json.process_id }}\"\n}",
+        "options": {}
+      },
+      "id": "ce74768a-f86e-48c7-924a-13210d8b07fc",
+      "name": "Kill Loop Process",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1792,
+        15840
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "<__PLACEHOLDER_VALUE__Agent restart endpoint__>",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"agent_type\": \"{{ $json.agent_type }}\",\n  \"restart\": true,\n  \"timestamp\": \"{{ $now.toISO() }}\"\n}",
+        "options": {}
+      },
+      "id": "b52cb3c8-399b-41a3-85f5-d8b5704f1e7f",
+      "name": "Restart Stuck Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2016,
+        15840
+      ]
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "name",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "supervisor_actions"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "action_type": "={{ $json.action_type }}",
+            "target_agent": "={{ $json.target_agent }}",
+            "reason": "={{ $json.reason }}",
+            "timestamp": "={{ $json.timestamp || $now.toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "12f9cb8d-98a0-458f-9ed5-c1386f1df3b5",
+      "name": "Log SupervisorAgent Action",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2240,
+        15840
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "12de22c7-7d36-4ca8-8ad1-ee387e5234f8",
+      "name": "Merge Agent Collaboration Data",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2624,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "context",
+              "value": "weekly_creative_sync",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "timestamp",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "df9d20c9-79b5-4925-8a05-eff440fcd33c",
+      "name": "Add GameAgent Context",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        16672
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "f59c34dc-de83-4e35-ab03-7500336f0407",
+      "name": "GameAgent Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        16,
+        3632
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Execute game logic and mechanics calculations",
+        "jsCode": "return { gameState: \"initialized\", mechanics: query }"
+      },
+      "id": "4675685e-932e-485f-899b-04c88bf974a8",
+      "name": "Game Logic Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        144,
+        3632
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are GameAgent, specialized in game development, interactive experiences, and gamification. Task: {{ $json.userInput }}. Use the game logic tool to create game mechanics, design systems, and interactive features. Return complete game designs with implementation details.",
+        "options": {}
+      },
+      "id": "d97ba0e3-190f-4512-b119-0ee9cedce1b8",
+      "name": "GameAgent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        0,
+        3408
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "ed94df38-18aa-43ea-8ab9-a3ce55849ffe",
+      "name": "EmailAgent Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        16,
+        4064
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $fromAI('to') }}",
+        "subject": "={{ $fromAI('subject') }}",
+        "message": "={{ $fromAI('message_html') }}",
+        "options": {}
+      },
+      "id": "bc11f895-c57d-48e9-a8e1-a00974296ed7",
+      "name": "Gmail Tool",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        144,
+        4064
+      ],
+      "webhookId": "35c49bbc-a834-46c1-8871-8970ae67ca42"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are EmailAgent, specialized in email communication and automation. Task: {{ $json.userInput }}. Use the Gmail tool to send, manage, and automate email workflows. Craft professional, personalized emails with proper formatting and tone.",
+        "options": {}
+      },
+      "id": "eb4be239-0b5b-44db-b661-a05d4e76c9c5",
+      "name": "EmailAgent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        0,
+        3840
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "1bebb4bc-42e2-4904-9c06-f7193ae77407",
+      "name": "DiscordAgent Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        16,
+        4944
+      ]
+    },
+    {
+      "parameters": {
+        "guildId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "id": "461ed9f4-de5b-446d-9b6f-575b86d5180e",
+      "name": "Discord Tool",
+      "type": "n8n-nodes-base.discordTool",
+      "typeVersion": 2,
+      "position": [
+        144,
+        4944
+      ],
+      "webhookId": "6e129cc5-1147-4dca-a10e-e40bd11fe7e6"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are DiscordAgent, specialized in Discord community management and automation. Task: {{ $json.userInput }}. Use the Discord tool to create channels, manage servers, send messages, and automate community interactions. Build engaging Discord experiences.",
+        "options": {}
+      },
+      "id": "9d68b7e3-b9fb-4aa5-bc32-886a1de02eef",
+      "name": "DiscordAgent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        0,
+        4720
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "e6d24686-81a9-45c3-bca8-0f8a67eef7e4",
+      "name": "WebsiteAgent Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        16,
+        9632
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Fetch and analyze website content",
+        "url": "={{ $fromAI('website_url', 'Target website URL', 'string') }}",
+        "options": {}
+      },
+      "id": "4e8bb46f-24ab-4282-9a57-ec09596fc635",
+      "name": "Website API Tool",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        144,
+        9632
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are WebsiteAgent, specialized in web development, scraping, and website automation. Task: {{ $json.userInput }}. Use the website API tool to fetch data, analyze web content, and automate web interactions. Return structured website data and insights.",
+        "options": {}
+      },
+      "id": "87d2d5a4-3b45-48c8-959d-88186e6a8ea3",
+      "name": "WebsiteAgent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        0,
+        9408
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "bdb237c4-16be-4acb-b49a-e1704a597e45",
+      "name": "MobileUIAgent Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        16,
+        13424
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Interact with mobile app APIs",
+        "url": "={{ $fromAI('api_endpoint', 'Mobile API endpoint', 'string') }}",
+        "options": {}
+      },
+      "id": "56c1751e-cffb-4622-9426-59b2294a2111",
+      "name": "Mobile API Tool",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        144,
+        13424
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are MobileUIAgent, specialized in mobile app design and user interface optimization. Task: {{ $json.userInput }}. Use the mobile API tool to create responsive designs, optimize user experiences, and implement mobile-first interfaces. Return complete UI/UX specifications.",
+        "options": {}
+      },
+      "id": "a38cdce2-cf34-4296-85a3-46f93408d9d7",
+      "name": "MobileUIAgent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        0,
+        13200
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "1f2f28e6-44b5-4506-b2fc-abf5851f4663",
+      "name": "LiveChatAgent Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        16,
+        14304
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Manage live chat conversations",
+        "url": "={{ $fromAI('chat_api_url', 'Live chat API endpoint', 'string') }}",
+        "options": {}
+      },
+      "id": "f556fde0-5438-44d4-8f79-d41cc200190a",
+      "name": "LiveChat API Tool",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        144,
+        14304
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are LiveChatAgent, specialized in real-time customer support and conversational interfaces. Task: {{ $json.userInput }}. Use the live chat API tool to manage conversations, provide instant support, and create chatbot experiences. Deliver helpful, empathetic responses.",
+        "options": {}
+      },
+      "id": "934a5191-9a11-4b4e-9ead-6d97dd6c0090",
+      "name": "LiveChatAgent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        0,
+        14080
+      ]
+    },
+    {
+      "parameters": {
+        "path": "webhook/user-input",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "ee9940b0-418e-4ba9-a2cc-43db9478b163",
+      "name": "Webhook User Input",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        5376
+      ],
+      "webhookId": "0a0003d9-fa98-47ea-a6dc-a2d9259bab58"
+    },
+    {
+      "parameters": {
+        "path": "webhook/discord",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "cf1e7978-3611-45ba-ba83-edda9dd23e46",
+      "name": "Discord Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        8736
+      ],
+      "webhookId": "5b7f8660-8fb1-4789-9f10-9a5d849f6919"
+    },
+    {
+      "parameters": {
+        "path": "webhook/livechat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "c1ce414d-f650-44f6-a2f5-140027679012",
+      "name": "LiveChat Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        10288
+      ],
+      "webhookId": "78c3c52f-7bcd-4346-b2a1-c9da5185790f"
+    },
+    {
+      "parameters": {
+        "path": "webhook/mobile",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "555b040d-f8b2-40c0-90fd-22a916c7a67a",
+      "name": "MobileUI Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        11632
+      ],
+      "webhookId": "331d43fb-959f-4cf5-828d-212f24fcfb48"
+    },
+    {
+      "parameters": {
+        "path": "webhook/website",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "b27c88a3-0e2b-42e1-a91e-311a9379aad6",
+      "name": "Website Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        12304
+      ],
+      "webhookId": "15e27b28-4dc4-4248-972c-6bdfe8ebb08c"
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/pinecone/index-name/vectors/upsert",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "91175742-ddcf-49cc-9a17-23200509f8c2",
+      "name": "PineconeUpsert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        8288
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/local-storage/save",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "8cd76117-af56-4566-bb70-4b607108d3f7",
+      "name": "LocalFallback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        8512
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "return [{json:{supervisor_status:'ok', timestamp:new Date().toISOString()}}];"
+      },
+      "id": "1c1a68db-dfbe-4411-b893-e053ad7c22cb",
+      "name": "SupervisorAgent",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        0,
+        11184
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/discord/post",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "7d1f12ba-2d28-4fd4-8d8c-74047e952784",
+      "name": "DiscordPost",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        9184
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/social/post",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "e2225488-20f3-47b9-b82d-005e33820636",
+      "name": "SocialPost",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        10512
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "20c214b6-9f8c-4dee-ae89-c8a4d1df81a3",
+      "name": "Manual Trigger - Test Runner",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        12528
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/mcp/dispatch",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "fed1ae9a-a272-4141-867b-3340d612e9c0",
+      "name": "Test Send",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        12752
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "console.log(items); return items;"
+      },
+      "id": "3774c93c-50e2-43bb-8c7d-c35c7e5ffa21",
+      "name": "Test Log",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        0,
+        12976
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const cfg = $('Workflow Configuration').first().json; const max = cfg.MAX_RETRIES || 3; return items;"
+      },
+      "id": "bed8986c-3f15-4374-a50a-93c24558e6a9",
+      "name": "HTTP Retry Wrapper",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        0,
+        11856
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "8a74e131-52d6-48a6-8feb-500a89756c0f",
+      "name": "Workflow Configuration1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        0,
+        4272
+      ]
+    },
+    {
+      "parameters": {
+        "path": "api/mcp/dispatch",
+        "options": {}
+      },
+      "id": "cb77bc0d-fa29-4d88-868d-0b401c97ea01",
+      "name": "MCP-API Webhook1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        5824
+      ],
+      "webhookId": "4c3c66ef-67c6-4efe-86f4-9f9bf9fe48f0"
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/agent/master",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "bf60117d-bfca-4ea3-a3d7-d5c78995e3bd",
+      "name": "MasterAgent1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        5600
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/agent/classifier",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "379b8dc5-9dc6-4b3c-82e3-fd609f5202d7",
+      "name": "ClassifierAgent1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        6048
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "00dba080-f01d-4a98-8f90-c9c36d2dee30",
+      "name": "SplitInBatches1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        0,
+        6272
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json[\"endpoint\"] || 'https://api.example.com/agent' }}",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "1aceae96-b3b7-441e-87ed-884b6a7f5a38",
+      "name": "DispatchHTTP1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        6496
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "5c2e9d7d-cfaa-4148-9b27-5a3fc0627dd9",
+      "name": "MergeResults1",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 1,
+      "position": [
+        0,
+        6720
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/agent/feedback/evaluate",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "b960ce6f-4b7e-4028-bdc0-5063c73a90c3",
+      "name": "FeedbackAgent1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        6944
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const it = items[0].json; if(it.feedback && it.feedback.retry){ return [{json:{action:'retry', task_id: it.task_id}}]; } return [{json:{action:'ok', task_id: it.task_id}}];"
+      },
+      "id": "f1fb4b7a-5fe2-49f2-ace5-911938768962",
+      "name": "LoopAgentFunction1",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        0,
+        7168
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "d535eea2-873e-4fb5-bbd5-6e4f1bdd5157",
+      "name": "WaitBackoff1",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        0,
+        7392
+      ],
+      "webhookId": "40186230-f37b-4201-909b-aba9728b490d"
+    },
+    {
+      "parameters": {
+        "table": "revenant_metrics",
+        "columns": [
+          {
+            "name": "task_id",
+            "value": "={{ $json[\"task_id\"] }}"
+          },
+          {
+            "name": "stage",
+            "value": "={{ $json[\"stage\"] || 'dispatch' }}"
+          },
+          {
+            "name": "status",
+            "value": "={{ $json[\"status\"] || 'ok' }}"
+          },
+          {
+            "name": "duration_ms",
+            "value": "={{ $json[\"duration_ms\"] || 0 }}"
+          }
+        ],
+        "additionalFields": {}
+      },
+      "id": "9ad0fb55-f7b0-497e-87ea-f4c943319402",
+      "name": "ObservabilityPostgres1",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        0,
+        9840
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/logs/activity",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "14d669d2-161b-4038-9aa8-f490aba2c925",
+      "name": "ActivityLog1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        11408
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/agent/money",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "ebcda7f1-968d-4cab-a7ed-bf02acfcbf64",
+      "name": "MoneyAgent1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        8064
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/agent/writer",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "804532d3-0a96-4ced-83c7-f8d1535ead84",
+      "name": "WriterAgent1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        4496
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/agent/dev",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "5f4707a5-f6e7-45f3-b3ee-52e54472994c",
+      "name": "DevAgent1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        5152
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/agent/vision",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "27aeb47a-39e9-4738-91d9-1b1d71189c15",
+      "name": "VisionAgent1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        7616
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/agent/search",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "1a974a79-4634-47de-98d1-19e74b2d1b47",
+      "name": "SearchAgent1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        7840
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/agent/post",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "11710f07-18ff-4fbc-99b9-1cc279bf480a",
+      "name": "PostAgent1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        8960
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/agent/email",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "3c399713-94d0-4593-a23a-09bf080bbee9",
+      "name": "EmailAgent1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        10064
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/agent/game",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "id": "96e6c2f2-18bb-4045-bc73-17e63f39c361",
+      "name": "GameAgent1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        0,
+        10960
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://revenant-d1-mock.free.beeceptor.com/d1/session/init",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"email\": \"tester@revenant.ai\",\n  \"password\": \"secret\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        0,
+        224
+      ],
+      "id": "426521ef-20fd-4d23-8c29-b9ab901a265d",
+      "name": "HTTP Request",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://revenant-d1-mock.free.beeceptor.com/d1/session/init",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "=",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "{\n  \"email\": \"tester@revenant.ai\",\n  \"password\": \"secret\"\n}\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        0,
+        3184
+      ],
+      "id": "00d6f83b-5337-4200-bf7a-cbbaf8c04c7b",
+      "name": "HTTP Request2",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        224,
+        224
+      ],
+      "id": "fb45ce0d-73b0-4b1a-89f0-63478c8d0ff7",
+      "name": "HTTP Request3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Voice/Text Input Webhook": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Check Input Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Input Type": {
+      "main": [
+        [
+          {
+            "node": "VoiceAgent - Transcribe Audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Normalize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VoiceAgent - Transcribe Audio": {
+      "main": [
+        [
+          {
+            "node": "Normalize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Input": {
+      "main": [
+        [
+          {
+            "node": "MasterAgent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "MasterAgent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "MasterAgent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MasterAgent": {
+      "main": [
+        [
+          {
+            "node": "ClassifierAgent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classifier Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "ClassifierAgent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classification Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "ClassifierAgent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ClassifierAgent": {
+      "main": [
+        [
+          {
+            "node": "Route to Sub-Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Dynamic Agent Prioritization",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route to Sub-Agent": {
+      "main": [
+        [
+          {
+            "node": "DevAgent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "WriterAgent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SearchAgent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "VisionAgent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "MoneyAgent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PostAgent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DevAgent Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "DevAgent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Execution Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "DevAgent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WriterAgent Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "WriterAgent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SearchAgent Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "SearchAgent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Web Search Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "SearchAgent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VisionAgent Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "VisionAgent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Generation Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "VisionAgent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MoneyAgent Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "MoneyAgent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Product API Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "MoneyAgent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostAgent Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "PostAgent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Social Media API Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "PostAgent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DevAgent": {
+      "main": [
+        [
+          {
+            "node": "Merge Agent Results",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "DevAgent → WriterAgent Bridge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WriterAgent": {
+      "main": [
+        [
+          {
+            "node": "Merge Agent Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "SearchAgent": {
+      "main": [
+        [
+          {
+            "node": "Merge Agent Results",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "VisionAgent": {
+      "main": [
+        [
+          {
+            "node": "Merge Agent Results",
+            "type": "main",
+            "index": 3
+          },
+          {
+            "node": "VisionAgent → WriterAgent Bridge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MoneyAgent": {
+      "main": [
+        [
+          {
+            "node": "Merge Agent Results",
+            "type": "main",
+            "index": 4
+          },
+          {
+            "node": "MoneyAgent → PostAgent Bridge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostAgent": {
+      "main": [
+        [
+          {
+            "node": "Merge Agent Results",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    },
+    "FeedbackAgent": {
+      "main": [
+        [
+          {
+            "node": "LoopAgent - Check Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LoopAgent - Check Success": {
+      "main": [
+        [
+          {
+            "node": "Prepare Retry",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Final Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Retry": {
+      "main": [
+        [
+          {
+            "node": "Route to Sub-Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Final Response": {
+      "main": [
+        [
+          {
+            "node": "Return Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Agent Results": {
+      "main": [
+        [
+          {
+            "node": "Generate Task Metadata",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Agent Self-Assessment Logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Task Metadata": {
+      "main": [
+        [
+          {
+            "node": "Store Task Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Task Record": {
+      "main": [
+        [
+          {
+            "node": "Generate Embedding",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Embedding": {
+      "main": [
+        [
+          {
+            "node": "Store Vector in Pinecone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Vector in Pinecone": {
+      "main": [
+        [
+          {
+            "node": "Log Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Activity": {
+      "main": [
+        [
+          {
+            "node": "MemoryAgent - Store Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MemoryAgent - Store Result": {
+      "main": [
+        [
+          {
+            "node": "Quality Check LLM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quality Check LLM": {
+      "main": [
+        [
+          {
+            "node": "Parse Quality Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Quality Response": {
+      "main": [
+        [
+          {
+            "node": "Store Feedback Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Feedback Record": {
+      "main": [
+        [
+          {
+            "node": "Store Feedback Vector",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Feedback Vector": {
+      "main": [
+        [
+          {
+            "node": "Check Quality Threshold",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Quality Threshold": {
+      "main": [
+        [
+          {
+            "node": "Read Retry Attempts",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Task Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Retry Attempts": {
+      "main": [
+        [
+          {
+            "node": "Check Max Retries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Max Retries": {
+      "main": [
+        [
+          {
+            "node": "Calculate Exponential Backoff",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Task Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Exponential Backoff": {
+      "main": [
+        [
+          {
+            "node": "Wait Before Retry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Before Retry": {
+      "main": [
+        [
+          {
+            "node": "Increment Retry Counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Increment Retry Counter": {
+      "main": [
+        [
+          {
+            "node": "Dispatch Retry via MCP-API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Task Failed": {
+      "main": [
+        [
+          {
+            "node": "Send Failure Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Task Status": {
+      "main": [
+        [
+          {
+            "node": "Format Final Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5-Min System Health Monitor": {
+      "main": [
+        [
+          {
+            "node": "Read Agent Performance Scores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Agent Performance Scores": {
+      "main": [
+        [
+          {
+            "node": "Read System Health Snapshots",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read System Health Snapshots": {
+      "main": [
+        [
+          {
+            "node": "Build System State JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build System State JSON": {
+      "main": [
+        [
+          {
+            "node": "Store System Health Snapshot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store System Health Snapshot": {
+      "main": [
+        [
+          {
+            "node": "Send to SupervisorAgent API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event Bus - TASK_ASSIGNED": {
+      "main": [
+        [
+          {
+            "node": "Log Collaboration Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event Bus - RESULT_READY": {
+      "main": [
+        [
+          {
+            "node": "Log Collaboration Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event Bus - NEEDS_REVIEW": {
+      "main": [
+        [
+          {
+            "node": "Log Collaboration Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weekly SearchAgent → GameAgent Sync": {
+      "main": [
+        [
+          {
+            "node": "Add GameAgent Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add GameAgent Context": {
+      "main": [
+        [
+          {
+            "node": "SearchAgent → GameAgent Bridge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DevAgent → WriterAgent Bridge": {
+      "main": [
+        [
+          {
+            "node": "Merge Agent Collaboration Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VisionAgent → WriterAgent Bridge": {
+      "main": [
+        [
+          {
+            "node": "Merge Agent Collaboration Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Agent Self-Assessment Logic": {
+      "main": [
+        [
+          {
+            "node": "Update Performance Scores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Frontend - /api/task": {
+      "main": [
+        [
+          {
+            "node": "Validate Access Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Access Token": {
+      "main": [
+        [
+          {
+            "node": "Check Token Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Token Valid": {
+      "main": [
+        [
+          {
+            "node": "Return Unauthorized",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Frontend - /api/status": {
+      "main": [
+        [
+          {
+            "node": "Fetch Real-Time Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Real-Time Status": {
+      "main": [
+        [
+          {
+            "node": "Format Status Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Status Response": {
+      "main": [
+        [
+          {
+            "node": "Return Status JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to SupervisorAgent API": {
+      "main": [
+        [
+          {
+            "node": "SupervisorAgent - Loop Detection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SupervisorAgent - Loop Detection": {
+      "main": [
+        [
+          {
+            "node": "Check for Infinite Loops",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for Infinite Loops": {
+      "main": [
+        [
+          {
+            "node": "Kill Loop Process",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kill Loop Process": {
+      "main": [
+        [
+          {
+            "node": "Restart Stuck Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restart Stuck Agent": {
+      "main": [
+        [
+          {
+            "node": "Log SupervisorAgent Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GameAgent Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "GameAgent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Game Logic Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "GameAgent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EmailAgent Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "EmailAgent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "EmailAgent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DiscordAgent Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "DiscordAgent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Discord Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "DiscordAgent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WebsiteAgent Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "WebsiteAgent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Website API Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "WebsiteAgent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MobileUIAgent Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "MobileUIAgent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mobile API Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "MobileUIAgent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LiveChatAgent Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "LiveChatAgent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LiveChat API Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "LiveChatAgent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9a3907ce-7b3a-4b21-8eb5-6b8bb2530ed2",
+  "meta": {
+    "instanceId": "45c426cf575386e961ded65eb8df1ef7e1682833df3197c603f479c39ae35b01"
+  },
+  "id": "95QUaHzm9MBNl6jB",
+  "tags": []
+}

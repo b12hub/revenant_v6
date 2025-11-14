@@ -4,3 +4,5 @@ sqlalchemy ~= 2.0.44
 psycopg2-binary ~= 2.9.11
 alembic ~= 1.17.1
 python-dotenv ~= 1.2.1
+pydantic[email] ~= 2.12.4pytest-asyncio
+pytest-asyncio

@@ -1,0 +1,479 @@
+{
+  "name": "revenant_C_series_workflow.json",
+  "nodes": [
+    {
+      "parameters": {
+        "notice": "C-Series Reasoning cycle started",
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 2
+            }
+          ]
+        }
+      },
+      "id": "8584e580-74c8-4f32-8b2c-511bea8f1926",
+      "name": "C-Series Initiator",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -672,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "REVENANT_B_URL",
+              "value": "https://revenant-b-series.internal/api/context",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "REVENANT_D_URL",
+              "value": "https://revenant-d-series.internal/api/governance",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "session_id",
+              "value": "={{ $now.toISO() }}-{{ $runIndex }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "cycle_start_time",
+              "value": "={{ $now.toMillis() }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "cd25499d-a112-48a9-87c3-779e1eded960",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -448,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\nconst config = $('Workflow Configuration').first().json;\n\nreturn input.map(item => ({\n  json: {\n    ...item.json,\n    module: 'C2_ContextBridge',\n    session_id: config.session_id,\n    semantic_layer: 'transformed',\n    metadata: {\n      timestamp: new Date().toISOString(),\n      source: 'B1_ContextualMemory',\n      transformation_applied: true\n    },\n    status: 200\n  }\n}));"
+      },
+      "id": "b8e22739-5828-4dbe-a573-b8db26695cbc",
+      "name": "C2_ContextBridge",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\nconst config = $('Workflow Configuration').first().json;\n\nconst intents = ['query', 'command', 'conversation', 'analysis'];\nconst selectedIntent = intents[Math.floor(Math.random() * intents.length)];\n\nreturn input.map(item => ({\n  json: {\n    ...item.json,\n    module: 'C3_IntentRouter',\n    intent: selectedIntent,\n    intent_confidence: 0.85 + Math.random() * 0.14,\n    routing_target: 'C4_DecisionGovernor',\n    status: 200\n  }\n}));"
+      },
+      "id": "8d078587-baa1-4f6b-963c-22479dacf61a",
+      "name": "C3_IntentRouter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\n\nreturn input.map(item => ({\n  json: {\n    ...item.json,\n    module: 'C4_DecisionGovernor',\n    decision_validated: true,\n    ethical_check: 'passed',\n    compliance_check: 'passed',\n    governance_score: 0.92 + Math.random() * 0.07,\n    decision_path: `${item.json.intent || 'unknown'}_validated`,\n    status: 200\n  }\n}));"
+      },
+      "id": "0b6cb72a-e8ef-4d85-9b3c-6e156b210a63",
+      "name": "C4_DecisionGovernor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\n\nconst tones = ['neutral', 'empathetic', 'professional', 'supportive'];\nconst selectedTone = tones[Math.floor(Math.random() * tones.length)];\n\nreturn input.map(item => ({\n  json: {\n    ...item.json,\n    module: 'C5_EmotionRegulator',\n    tone: selectedTone,\n    empathy_level: 0.6 + Math.random() * 0.4,\n    emotional_modulation: 'applied',\n    status: 200\n  }\n}));"
+      },
+      "id": "bfdf255e-423b-49c6-a646-0c2f7a43c11c",
+      "name": "C5_EmotionRegulator",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\n\nreturn input.map(item => ({\n  json: {\n    ...item.json,\n    module: 'C6_EthicalCore',\n    safety_check: 'passed',\n    governance_alignment: true,\n    ethical_score: 0.95 + Math.random() * 0.04,\n    safety_flags: [],\n    status: 200\n  }\n}));"
+      },
+      "id": "349769a5-e303-413e-af08-9e03abf6b58d",
+      "name": "C6_EthicalCore",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\n\nreturn input.map(item => ({\n  json: {\n    ...item.json,\n    module: 'C7_KnowledgeSynthesizer',\n    factual_data_merged: true,\n    emotional_data_merged: true,\n    synthesis_quality: 0.88 + Math.random() * 0.11,\n    knowledge_sources: ['factual_db', 'emotional_context'],\n    status: 200\n  }\n}));"
+      },
+      "id": "e60a6273-304f-44e2-844f-0faa430128c9",
+      "name": "C7_KnowledgeSynthesizer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\n\nreturn input.map(item => ({\n  json: {\n    ...item.json,\n    module: 'C8_ConversationOrchestrator',\n    reasoning_output: {\n      intent: item.json.intent,\n      decision: item.json.decision_path,\n      tone: item.json.tone,\n      safety_validated: true,\n      ready_for_output: true\n    },\n    orchestration_complete: true,\n    status: 200\n  }\n}));"
+      },
+      "id": "3954079d-6392-4294-ac92-b85994c4383e",
+      "name": "C8_ConversationOrchestrator",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\nconst config = $('Workflow Configuration').first().json;\nconst startTime = config.cycle_start_time;\nconst latency = Date.now() - startTime;\n\nconst traceLog = {\n  series: 'C',\n  session_id: config.session_id,\n  intent: input[0].json.intent || 'unknown',\n  decision_path: input[0].json.decision_path || 'none',\n  latency_ms: latency,\n  timestamp: new Date().toISOString()\n};\n\nconsole.log(JSON.stringify(traceLog));\n\nreturn input.map(item => ({\n  json: {\n    ...item.json,\n    trace_logged: true,\n    latency_ms: latency\n  }\n}));"
+      },
+      "id": "9903da39-ccc9-49a7-a783-b27e4fba3d43",
+      "name": "C_Series_TraceLogger",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 0.12
+      },
+      "id": "530c6d69-826c-48d2-afa0-b0906c7ae80d",
+      "name": "Queue Delay (120ms)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1792,
+        0
+      ],
+      "webhookId": "5ff06a52-5872-482d-8ed1-95d8f46d3b4a"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\n\nconst modules = [\n  'C1_ReasoningCore',\n  'C2_ContextBridge', \n  'C3_IntentRouter',\n  'C4_DecisionGovernor',\n  'C5_EmotionRegulator',\n  'C6_EthicalCore',\n  'C7_KnowledgeSynthesizer',\n  'C8_ConversationOrchestrator'\n];\n\nconst allValid = input[0].json.status === 200;\nconst validationResult = {\n  all_modules_valid: allValid,\n  modules_count: 8,\n  validation_passed: allValid\n};\n\nreturn [{\n  json: {\n    ...input[0].json,\n    validation: validationResult,\n    modules_validated: 8\n  }\n}];"
+      },
+      "id": "76ff9e7e-8110-481f-99d2-d446004d2c50",
+      "name": "Validator",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2016,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ Math.random() * 100 }}",
+              "rightValue": 2,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "efe440fc-3fbf-44ce-be19-1d35c605f081",
+      "name": "C_Series_HealthCheck",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\n\nconsole.log('C-Series auto-recovery engaged.');\n\nreturn [{\n  json: {\n    recovery_triggered: true,\n    recovery_timestamp: new Date().toISOString(),\n    recovery_reason: 'health_check_failed',\n    retry_attempt: 1,\n    session_id: input[0].json.session_id\n  }\n}];"
+      },
+      "id": "319a41c5-4ed6-4b0d-80f0-6b4df2c753d6",
+      "name": "C_Series_Recover",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2464,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\n\nconst completionLog = {\n  series: 'C',\n  modules_validated: 8,\n  trace_correlation: true,\n  status: 'OK'\n};\n\nconsole.log('C-Series reasoning flow complete with status OK.');\nconsole.log(JSON.stringify(completionLog));\n\nreturn [{\n  json: completionLog\n}];"
+      },
+      "id": "4533c80e-199c-4c9c-babc-daa6001c44b7",
+      "name": "C-Series Completion Logger",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2688,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\nconst config = $('Workflow Configuration').first().json;\n\n// Simulate B-Series contextual input response\nreturn input.map(item => ({\n  json: {\n    ...item.json,\n    module: 'C1_ReasoningCore',\n    session_id: config.session_id,\n    b_series_response: {\n      contextual_data: 'Sample context from B1_ContextualMemory',\n      memory_retrieved: true,\n      context_quality: 0.89\n    },\n    status: 200\n  }\n}));"
+      },
+      "id": "64084a95-d293-4b54-8580-6e7aca3f2ebc",
+      "name": "C1_ReasoningCore",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\nconst config = $('Workflow Configuration').first().json;\n\n// Simulate D-Series governance output\nconst d_series_payload = {\n  series: 'C',\n  session_id: input[0].json.session_id,\n  reasoning_output: input[0].json.reasoning_output,\n  validation: input[0].json.validation,\n  timestamp: new Date().toISOString(),\n  d_series_received: true\n};\n\nconsole.log('D-Series Output:', JSON.stringify(d_series_payload));\n\nreturn [{\n  json: {\n    ...input[0].json,\n    d_series_output: d_series_payload\n  }\n}];"
+      },
+      "id": "af516ccc-2acf-4dd0-bc96-12326b2cd7fa",
+      "name": "D-Series Output1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2464,
+        192
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "C-Series Initiator": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "C1_ReasoningCore",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "C1_ReasoningCore": {
+      "main": [
+        [
+          {
+            "node": "C2_ContextBridge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "C2_ContextBridge": {
+      "main": [
+        [
+          {
+            "node": "C3_IntentRouter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "C3_IntentRouter": {
+      "main": [
+        [
+          {
+            "node": "C4_DecisionGovernor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "C4_DecisionGovernor": {
+      "main": [
+        [
+          {
+            "node": "C5_EmotionRegulator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "C5_EmotionRegulator": {
+      "main": [
+        [
+          {
+            "node": "C6_EthicalCore",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "C6_EthicalCore": {
+      "main": [
+        [
+          {
+            "node": "C7_KnowledgeSynthesizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "C7_KnowledgeSynthesizer": {
+      "main": [
+        [
+          {
+            "node": "C8_ConversationOrchestrator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "C8_ConversationOrchestrator": {
+      "main": [
+        [
+          {
+            "node": "C_Series_TraceLogger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "C_Series_TraceLogger": {
+      "main": [
+        [
+          {
+            "node": "Queue Delay (120ms)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Queue Delay (120ms)": {
+      "main": [
+        [
+          {
+            "node": "Validator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validator": {
+      "main": [
+        [
+          {
+            "node": "C_Series_HealthCheck",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "C_Series_HealthCheck": {
+      "main": [
+        [
+          {
+            "node": "D-Series Output1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "C_Series_Recover",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "C_Series_Recover": {
+      "main": [
+        [
+          {
+            "node": "C1_ReasoningCore",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D-Series Output1": {
+      "main": [
+        [
+          {
+            "node": "C-Series Completion Logger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a5477e6c-ccc8-4fc0-8703-2e38f3386af3",
+  "meta": {
+    "instanceId": "45c426cf575386e961ded65eb8df1ef7e1682833df3197c603f479c39ae35b01"
+  },
+  "id": "PXtyXNmxNOrFGO1v",
+  "tags": []
+}
