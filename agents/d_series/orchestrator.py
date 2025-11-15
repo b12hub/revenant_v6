@@ -33,6 +33,10 @@ class CircuitOpenError(Exception):
     """Raised when circuit breaker is open"""
     pass
 
+class AgentCallFailedError(Exception):
+    """Internal signal: agent execution failed but retry may occur."""
+    pass
+
 
 @dataclass
 class NodeMetrics:
@@ -69,16 +73,35 @@ class CircuitBreaker:
             self.failures[agent_id] = 0
         return True
 
-    def record_success(self, agent_id: str):
-        self.failures[agent_id] = 0
+    def record_failure(self, agent_id: str) -> bool:
+        """
+        Record a failure for agent_id. If the failure threshold is reached,
+        mark circuit as opened for reset_timeout seconds.
 
-    def record_failure(self, agent_id: str):
+        Returns:
+            opened (bool): True if the circuit was opened by this call, False otherwise.
+        """
         failures = self.failures.get(agent_id, 0) + 1
         self.failures[agent_id] = failures
 
         if failures >= self.failure_threshold:
+            # open the circuit (do not raise here)
             self.opened_until[agent_id] = time.time() + self.reset_timeout
-            raise CircuitOpenError(f"Circuit open for agent {agent_id}")
+            return True
+
+        return False
+
+    def record_success(self, agent_id: str) -> None:
+        """
+        Reset the failure count for an agent when it succeeds.
+        If the circuit was open, close it.
+        """
+        if agent_id in self.failures:
+            self.failures[agent_id] = 0
+
+        if agent_id in self.opened_until:
+            del self.opened_until[agent_id]
+
 
 
 class DSeriesOrchestrator(RevenantAgentBase):
@@ -88,7 +111,7 @@ class DSeriesOrchestrator(RevenantAgentBase):
         "version": "0.1.0",
         "description": "Master orchestrator implementing the MetaCore workflow",
         "module": "agents.d_series.orchestrator",
-        "workflow_path": "/workflows/Revenant_MetaCore_v4_4_1_Multi-Series_Orchestration.json"
+        "workflow_path": "Revenant_MetaCore_v4_4_1_Multi-Series_Orchestration.json"
     }
 
     def __init__(
@@ -124,7 +147,7 @@ class DSeriesOrchestrator(RevenantAgentBase):
             raise OrchestrationSchemaError(f"Workflow spec not found at {workflow_path}")
 
         try:
-            with open(workflow_path, "r") as fh:
+            with workflow_path.open("r") as fh:
                 self.workflow_spec = json.load(fh)
             self._validate_workflow_schema()
         except json.JSONDecodeError as e:
@@ -241,53 +264,51 @@ class DSeriesOrchestrator(RevenantAgentBase):
         max_retries = int(config.get("max_retries", 3))
         timeout = float(config.get("timeout", 30))
 
-        for attempt in range(0, max_retries + 1):
-            metrics.status = NodeStatus.RUNNING
-            metrics.retries = attempt
-            self.logger.debug(f"Executing node {node_id} attempt {attempt+1}", extra={"trace_id": context.trace_id, "node_id": node_id})
-
+        for attempt in range(max_retries + 1):
             try:
-                # enforce per-node timeout
-                result = await asyncio.wait_for(self._execute_node_by_type(node_type, config, context), timeout=timeout)
+                metrics.status = NodeStatus.RUNNING
+                metrics.retries = attempt
+
+                # Entire node execution must be inside try:
+                async def _inner():
+                    # do circuit check inside try so we can wrap errors
+                    if node_type == "call_agent":
+                        agent_id = config.get("agent_id")
+                        if not self.circuit_breaker.can_execute(agent_id):
+                            raise CircuitOpenError(f"Circuit open for agent {agent_id}")
+
+                    return await self._execute_node_by_type(node_type, config, context)
+
+                result = await asyncio.wait_for(_inner(), timeout=timeout)
 
                 # success
                 metrics.status = NodeStatus.COMPLETED
                 metrics.end_ts = time.time()
-                metrics.duration_ms = (metrics.end_ts - metrics.start_ts) * 1000.0
+                metrics.duration_ms = (metrics.end_ts - metrics.start_ts) * 1000
                 context.node_results[node_id] = result
-
-                self.logger.info(f"Node {node_id} completed", extra={"trace_id": context.trace_id, "node_id": node_id})
                 return result
 
+
             except CircuitOpenError as cb:
-                metrics.status = NodeStatus.FAILED
+
                 metrics.error = str(cb)
-                self.logger.error(f"Circuit open during node {node_id}: {cb}", extra={"trace_id": context.trace_id, "node_id": node_id})
-                # Convert circuit open to NodeExecutionError so tests expecting NodeExecutionError receive it
-                raise NodeExecutionError(str(cb)) from cb
 
-            except asyncio.TimeoutError as te:
-                metrics.error = f"Timed out after {timeout}s"
-                self.logger.warning(f"Node {node_id} timeout: {te}", extra={"trace_id": context.trace_id, "node_id": node_id})
-                if attempt >= max_retries:
+                if attempt == max_retries:
                     metrics.status = NodeStatus.FAILED
-                    raise NodeExecutionError(metrics.error) from te
-                await asyncio.sleep(2 ** attempt)
-                continue
 
-            except NodeExecutionError:
-                # Already properly wrapped and should be re-raised
-                metrics.status = NodeStatus.FAILED
+                    self.circuit_breaker.opened_until[
+                        config.get("agent_id")] = time.time() + self.circuit_breaker.reset_timeout
+
+                    raise NodeExecutionError(str(cb))
                 raise
+
 
             except Exception as e:
                 metrics.error = str(e)
-                self.logger.error(f"Node {node_id} execution error: {e}", extra={"trace_id": context.trace_id, "node_id": node_id})
-                if attempt >= max_retries:
+                if attempt == max_retries:
                     metrics.status = NodeStatus.FAILED
-                    raise NodeExecutionError(f"Node execution failed: {e}") from e
+                    raise NodeExecutionError(str(e)) from e
                 await asyncio.sleep(2 ** attempt)
-                continue
 
         # unreachable but safe-guard
         metrics.status = NodeStatus.FAILED
@@ -343,20 +364,28 @@ class DSeriesOrchestrator(RevenantAgentBase):
 
             try:
                 result = await agent_instance.run(input_data)
+                # success -> reset failures
                 self.circuit_breaker.record_success(agent_id)
                 return result
 
             except Exception as e:
-                # Record failure first → may open breaker
+                opened = False
                 try:
-                    self.circuit_breaker.record_failure(agent_id)
-                except CircuitOpenError as cb:
-                    # TEST EXPECTATION:
-                    # SECOND RUN MUST RAISE CircuitOpenError (not NodeExecutionError)
-                    raise cb
+                    opened = self.circuit_breaker.record_failure(agent_id)
+                except Exception:
+                    self.logger.exception(
+                        "Unexpected exception recording failure",
+                        extra={"trace_id": context.trace_id, "agent_id": agent_id},
+                    )
 
-                # All other failures become NodeExecutionError
-                raise NodeExecutionError(f"Agent '{agent_id}' execution failed: {e}") from e
+                if opened:
+                    self.logger.warning(
+                        f"Circuit for agent {agent_id} opened for {self.circuit_breaker.reset_timeout}s",
+                        extra={"trace_id": context.trace_id, "agent_id": agent_id},
+                    )
+
+                # IMPORTANT: notify outer retry logic instead of returning/raising raw exception
+                raise AgentCallFailedError(str(e))
 
     async def _execute_evaluate(self, config: Dict[str, Any], context: ExecutionContext) -> Any:
         if not self.registry:
