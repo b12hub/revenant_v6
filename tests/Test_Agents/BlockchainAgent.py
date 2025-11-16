@@ -1,4 +1,4 @@
-from agents.blockchain_agent import BlockchainAgent
+from agents.b_series.blockchain_agent import BlockchainAgent
 import asyncio
 import json
 

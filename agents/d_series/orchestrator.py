@@ -9,6 +9,8 @@ from enum import Enum
 from pathlib import Path
 
 from core.agent_base import RevenantAgentBase
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 
 class NodeStatus(Enum):
@@ -47,6 +49,17 @@ class NodeMetrics:
     status: NodeStatus = NodeStatus.PENDING
     error: Optional[str] = None
     retries: int = 0
+
+    def to_dict(self):
+        return {
+            "node_id": self.node_id,
+            "status": self.status.value if hasattr(self.status, "value") else self.status,
+            "start_ts": self.start_ts,
+            "end_ts": self.end_ts,
+            "duration_ms": self.duration_ms,
+            "retries": self.retries,
+            "error": self.error,
+        }
 
 
 @dataclass
@@ -167,42 +180,55 @@ class DSeriesOrchestrator(RevenantAgentBase):
             if not isinstance(node, dict) or "id" not in node or "type" not in node:
                 raise OrchestrationSchemaError("Node missing required fields: id or type")
 
-    async def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
-        trace_id = inputs.get("trace_id", f"trace_{int(time.time())}")
-        self.logger.info("Starting workflow execution", extra={"trace_id": trace_id})
-
+    async def run(self, input_data):
         context = ExecutionContext(
-            trace_id=trace_id,
-            workflow_data=inputs.get("workflow_data", {}),
+            trace_id=input_data.get("trace_id"),
+            workflow_data=input_data.get("workflow_data", {}),
             node_results={},
-            metrics={},
+            metrics={}
         )
 
         try:
-            result = await asyncio.wait_for(self._execute_workflow(context), timeout=self.global_timeout)
-            self.logger.info("Workflow completed successfully", extra={"trace_id": trace_id})
-            return result
-        except asyncio.TimeoutError as e:
-            msg = f"Workflow exceeded global timeout of {self.global_timeout}s"
-            self.logger.error(msg, extra={"trace_id": trace_id})
-            raise NodeExecutionError(msg) from e
-        except Exception:
-            self.logger.exception("Workflow execution failed", extra={"trace_id": trace_id})
+            result = await asyncio.wait_for(
+                self._execute_workflow(context),
+                timeout=self.global_timeout
+            )
+
+        except CircuitOpenError:
             raise
 
+        except NodeExecutionError:
+            raise
+
+        except asyncio.TimeoutError:
+            # ⭐ This must come BEFORE `Exception`
+            raise NodeExecutionError("global timeout exceeded")
+
+        except Exception as e:
+            self.logger.error(
+                "Workflow execution failed",
+                extra={"trace_id": context.trace_id, "error": str(e)}
+            )
+            raise NodeExecutionError(str(e)) from e
+        return { "node_results": context.node_results, "metrics": { nid: m.to_dict() for nid, m in context.metrics.items() } }
+
+
     async def _execute_workflow(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute the complete workflow — propagate node failures instead of swallowing them."""
         assert self.workflow_spec is not None, "workflow_spec must be loaded"
 
         nodes = self.workflow_spec.get("nodes", [])
         edges = self.workflow_spec.get("edges", [])
 
-        # build dependencies
+        # Build dependency graph
         dependencies = self._build_dependency_graph(edges)
 
         executed_nodes: Set[str] = set()
         node_map = {n["id"]: n for n in nodes}
 
+        # Execute until all nodes have been processed or an error occurs
         while len(executed_nodes) < len(nodes):
+            # Find ready nodes: not executed and all dependencies satisfied
             ready_nodes = [
                 node_map[nid]
                 for nid in node_map
@@ -213,19 +239,46 @@ class DSeriesOrchestrator(RevenantAgentBase):
                 remaining = set(node_map.keys()) - executed_nodes
                 raise NodeExecutionError(f"No ready nodes found, possible circular dependency. Remaining: {remaining}")
 
-            # run ready nodes concurrently
+            # Launch ready nodes concurrently.
+            # IMPORTANT: do NOT use return_exceptions=True — we want exceptions to bubble and stop execution.
             tasks = [self._execute_node(node, context) for node in ready_nodes]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
 
-            for node, res in zip(ready_nodes, results):
-                nid = node["id"]
-                if isinstance(res, Exception):
-                    self.logger.error(f"Node {nid} failed: {res}", extra={"trace_id": context.trace_id, "node_id": nid})
-                    # we treat node failure as a failure in metric and continue by default;
-                    # raising behavior is handled inside _execute_node after retries
-                executed_nodes.add(nid)
+            try:
+                # If any task raises, gather will raise the first exception (default behavior).
+                results = await asyncio.gather(*tasks)
 
-        # format metrics
+            except Exception as e:
+
+                # ------------------------------------
+                # 1. Let CircuitOpenError bubble raw
+                # ------------------------------------
+                if isinstance(e, CircuitOpenError):
+                    raise
+
+                # ------------------------------------
+                # 2. Let NodeExecutionError bubble raw
+                # ------------------------------------
+                if isinstance(e, NodeExecutionError):
+                    raise
+
+                # ------------------------------------
+                # 3. Wrap unknown errors
+                # ------------------------------------
+                self.logger.error(
+                    "Workflow execution halted due to unexpected error",
+                    extra={"trace_id": context.trace_id, "error": str(e)}
+                )
+                raise NodeExecutionError(str(e)) from e
+
+            # If we reach here, all tasks finished OK — mark them executed and store results
+            for node, result in zip(ready_nodes, results):
+                executed_nodes.add(node["id"])
+                # node results are already stored inside _execute_node (context.node_results)
+                # but ensure result presence just in case
+                if node["id"] not in context.node_results:
+                    context.node_results[node["id"]] = result
+
+        # Format metrics for return
         metrics_out = {}
         for node_id, m in context.metrics.items():
             metrics_out[node_id] = {
@@ -237,9 +290,11 @@ class DSeriesOrchestrator(RevenantAgentBase):
 
         return {
             "trace_id": context.trace_id,
-            "workflow_output": context.workflow_data,
             "node_results": context.node_results,
-            "metrics": metrics_out,
+            "metrics": {
+                nid: m.to_dict() if hasattr(m, "to_dict") else m.__dict__
+                for nid, m in context.metrics.items()
+            }
         }
 
     def _build_dependency_graph(self, edges: List[Dict[str, str]]) -> Dict[str, List[str]]:
@@ -257,11 +312,10 @@ class DSeriesOrchestrator(RevenantAgentBase):
         node_type = node["type"]
         config = node.get("config", {})
 
-        # initialize metrics
         metrics = NodeMetrics(node_id=node_id, start_ts=time.time())
         context.metrics[node_id] = metrics
 
-        max_retries = int(config.get("max_retries", 3))
+        max_retries = int(config.get("max_retries", 0))
         timeout = float(config.get("timeout", 30))
 
         for attempt in range(max_retries + 1):
@@ -269,48 +323,33 @@ class DSeriesOrchestrator(RevenantAgentBase):
                 metrics.status = NodeStatus.RUNNING
                 metrics.retries = attempt
 
-                # Entire node execution must be inside try:
                 async def _inner():
-                    # do circuit check inside try so we can wrap errors
-                    if node_type == "call_agent":
-                        agent_id = config.get("agent_id")
-                        if not self.circuit_breaker.can_execute(agent_id):
-                            raise CircuitOpenError(f"Circuit open for agent {agent_id}")
-
+                    # REMOVE circuit check — handled inside _execute_call_agent
                     return await self._execute_node_by_type(node_type, config, context)
 
                 result = await asyncio.wait_for(_inner(), timeout=timeout)
 
-                # success
                 metrics.status = NodeStatus.COMPLETED
                 metrics.end_ts = time.time()
                 metrics.duration_ms = (metrics.end_ts - metrics.start_ts) * 1000
                 context.node_results[node_id] = result
                 return result
 
-
             except CircuitOpenError as cb:
-
                 metrics.error = str(cb)
+                metrics.status = NodeStatus.FAILED
 
-                if attempt == max_retries:
-                    metrics.status = NodeStatus.FAILED
-
-                    self.circuit_breaker.opened_until[
-                        config.get("agent_id")] = time.time() + self.circuit_breaker.reset_timeout
-
-                    raise NodeExecutionError(str(cb))
+                # Propagate RAW CircuitOpenError — test 2 expects this
                 raise
-
 
             except Exception as e:
                 metrics.error = str(e)
                 if attempt == max_retries:
                     metrics.status = NodeStatus.FAILED
                     raise NodeExecutionError(str(e)) from e
+
                 await asyncio.sleep(2 ** attempt)
 
-        # unreachable but safe-guard
         metrics.status = NodeStatus.FAILED
         raise NodeExecutionError(f"Node {node_id} failed after {max_retries} retries")
 

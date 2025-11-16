@@ -1,4 +1,4 @@
-from agents.data_science_agent import DataScienceAgent
+from agents.b_series.data_science_agent import DataScienceAgent
 import asyncio
 import json
 

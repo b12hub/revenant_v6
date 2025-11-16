@@ -1,4 +1,4 @@
-from agents.legal_agent import LegalAgent
+from agents.b_series.legal_agent import LegalAgent
 import asyncio
 import json
 

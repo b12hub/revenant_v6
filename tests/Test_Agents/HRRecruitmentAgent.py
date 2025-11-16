@@ -1,4 +1,4 @@
-from agents.hr_recruitment_agent import HRRecruitmentAgent
+from agents.b_series.hr_recruitment_agent import HRRecruitmentAgent
 import asyncio
 import json
 
