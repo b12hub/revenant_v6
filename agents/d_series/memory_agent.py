@@ -37,7 +37,10 @@ class MemoryAgent(RevenantAgentBase):
             db_path: Path to SQLite database file
             enable_embeddings: Whether to enable semantic embedding features
         """
-        super().__init__()
+        super().__init__(
+            name=self.metadata['name'] ,
+            description=self.metadata['description']
+        )
         self.db_path = Path(db_path)
         self.enable_embeddings = enable_embeddings
         self._lock = asyncio.Lock()

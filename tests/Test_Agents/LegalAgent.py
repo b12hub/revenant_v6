@@ -2,8 +2,7 @@ from agents.b_series.legal_agent import LegalAgent
 import asyncio
 import json
 
-
-async def test_legal_agent():
+async def test_legal_agent(contract_text: str = None):
     agent = LegalAgent()
 
     # Sample contract text
@@ -14,10 +13,10 @@ async def test_legal_agent():
     security measures. Liability is limited to the contract value.
     """
 
-    result = await agent.run({
-        "contract_text": contract_text,
-        "analysis_type": "comprehensive"
-    })
+    result = await agent.run(dict(
+        contract_text= contract_text,
+        analysis_type= "comprehensive"
+    ))
 
     print("Legal Agent Result:")
     print(json.dumps(result, indent=2))

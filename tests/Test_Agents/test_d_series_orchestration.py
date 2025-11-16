@@ -6,6 +6,9 @@ Validates CoordinatorAgent delegation and FusionAgent merging.
 
 import asyncio
 import logging
+
+import pytest
+
 from agents.d_series.coordinator_agent import CoordinatorAgent
 from agents.d_series.fusion_agent import FusionAgent
 

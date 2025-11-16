@@ -23,8 +23,11 @@ class FusionAgent(RevenantAgentBase):
         "module": "agents.d_series.fusion_agent"
     }
     def __init__(self):
+        # ensure instance metadata = class metadata copy
+        self.metadata = type(self).metadata.copy()
+
         """Initialize FusionAgent with conflict resolution strategies."""
-        super().__init__(    name=self.metadata['name'] ,
+        super().__init__(name=self.metadata['name'] ,
             description=self.metadata['description']
         )
         self.conflict_strategies = {
@@ -33,7 +36,17 @@ class FusionAgent(RevenantAgentBase):
             'context_aware': self._context_aware_resolution,
             'temporal_recent': self._temporal_recent_resolution
         }
-        logger.info(f"Initialized {self.metadata['series']}-Series FusionAgent v{self.metadata['version']}")
+        logger.info(
+            f"Initialized {FusionAgent.metadata['series']}-Series FusionAgent v{FusionAgent.metadata['version']}"
+        )
+
+    async def run(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Required abstract method implementation.
+        Delegates directly to the fusion pipeline.
+        """
+        outputs = data.get("agent_outputs", [])
+        return await self.fuse(outputs)
 
     async def fuse(self, agent_outputs: List[Dict[str, Any]]) -> Dict[str, Any]:
         """

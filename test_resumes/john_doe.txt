@@ -1,0 +1,12 @@
+John Doe
+john.doe@email.com
+(555) 123-4567
+
+SKILLS:
+Python, JavaScript, React, AWS, Docker, SQL, Pandas
+
+EXPERIENCE:
+5 years as Senior Software Engineer at Tech Company
+
+EDUCATION:
+Bachelor of Science in Computer Science - University of Technology

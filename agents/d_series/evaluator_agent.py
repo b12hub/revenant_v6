@@ -26,7 +26,11 @@ class EvaluatorAgent(RevenantAgentBase):
     }
     def __init__(self):
         """Initialize EvaluatorAgent with scoring models and thresholds."""
-        super().__init__()
+        super().__init__(
+            name = self.metadata["name"] ,
+            description = self.metadata["description"]
+
+        )
         self.scoring_weights = {
             'completeness': 0.25,
             'consistency': 0.30,
